@@ -227,7 +227,9 @@
            transform-origin:top center;
            animation:menuSlide .35s cubic-bezier(.2,.9,.3,1.1); }
   #menuBar.hidden { display:none; }
+  #menuBar.closing { animation:menuRetract .3s cubic-bezier(.5,0,.8,.4); }
   @keyframes menuSlide { from { opacity:0; transform:scaleY(.2); } to { opacity:1; transform:scaleY(1); } }
+  @keyframes menuRetract { from { opacity:1; transform:scaleY(1); } to { opacity:0; transform:scaleY(.2); } }
   #menuBar button { display:flex; align-items:center; justify-content:center;
            width:40px; height:40px; border-radius:50%;
            border:none; background:transparent;
@@ -1735,26 +1737,36 @@ function openNotepad(){
   show("notepadModal");
 }
 /* ================= FEATURE MENU ================= */
+function closeMenu(){
+  var bar=$("menuBar");
+  if(bar.classList.contains("hidden")||bar.classList.contains("closing")) return;
+  bar.classList.add("closing");
+  $("menuBtn").classList.remove("open");
+  setTimeout(function(){
+    bar.classList.add("hidden");
+    bar.classList.remove("closing");
+  }, 280);
+}
 $("menuBtn").onclick=function(){
   var bar=$("menuBar");
   var opening=bar.classList.contains("hidden");
   if(opening){ bar.classList.remove("hidden"); $("menuBtn").classList.add("open"); }
-  else{ bar.classList.add("hidden"); $("menuBtn").classList.remove("open"); }
+  else{ closeMenu(); }
 };
 // click outside closes the menu
 document.addEventListener("click", function(e){
   var bar=$("menuBar");
   if(!bar.classList.contains("hidden") &&
      !$("menuBtn").contains(e.target) && !bar.contains(e.target)){
-    bar.classList.add("hidden"); $("menuBtn").classList.remove("open");
+    closeMenu();
   }
 });
 $("menuAddon").onclick=function(){
-  $("menuBar").classList.add("hidden"); $("menuBtn").classList.remove("open");
+  closeMenu();
   show("addonModal");
 };
 $("menuNotes").onclick=function(){
-  $("menuBar").classList.add("hidden"); $("menuBtn").classList.remove("open");
+  closeMenu();
   openNotepad();
 };
 $("notepadClose").onclick=function(){ hide("notepadModal"); };
