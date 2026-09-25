@@ -324,6 +324,27 @@
                       inset 0 1px 1px rgba(255,255,255,.35),
                       inset 0 -1px 1px rgba(255,255,255,.08);
            padding:18px 20px 22px; animation:popIn .32s ease; text-align:center; }
+  /* Document window: long-form writing, right side, Ondra Liquid Glass style */
+  #docWin { position:fixed; right:18px; top:50%; transform:translateY(-50%); width:420px; max-width:calc(100vw - 36px);
+           max-height:80vh; overflow:hidden; display:flex; flex-direction:column; z-index:80; border-radius:24px;
+           background:
+             linear-gradient(160deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.03) 28%, rgba(255,255,255,0) 55%),
+             rgba(16,20,29,.58);
+           -webkit-backdrop-filter:blur(24px) saturate(1.7);
+           backdrop-filter:blur(24px) saturate(1.7);
+           border:1px solid rgba(255,255,255,.2);
+           box-shadow:0 16px 56px rgba(0,0,0,.5),
+                      inset 0 1px 1px rgba(255,255,255,.35),
+                      inset 0 -1px 1px rgba(255,255,255,.08);
+           padding:18px 20px 22px; animation:popIn .32s ease; }
+  #docWin.hidden { display:none; }
+  .doc-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  #docTitle { font-size:17px; font-weight:600; color:#eef1f6; }
+  .doc-actions { display:flex; gap:8px; }
+  .doc-actions button { width:32px; height:32px; border-radius:50%; border:1px solid rgba(255,255,255,.2);
+           background:rgba(255,255,255,.06); color:#dfe5ef; font-size:15px; cursor:pointer; }
+  .doc-actions button:hover { border-color:#8ab4ff; color:#8ab4ff; }
+  #docBody { overflow-y:auto; color:#dfe5ef; font-size:14px; line-height:1.7; white-space:pre-wrap; text-align:left; }
   #popup.hidden { display:none; }
   @keyframes popIn { from { opacity:0; transform:translateY(-50%) translateX(24px); } to { opacity:1; transform:translateY(-50%); } }
   .popup-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;
@@ -563,6 +584,17 @@
   <div id="popup" class="hidden">
     <div class="popup-head"><span id="popupTitle"></span><button id="popupClose" data-tip="Close" aria-label="close">✕</button></div>
     <div id="popupBody"></div>
+  </div>
+  <!-- 4c. DOCUMENT WINDOW (long-form writing: essays, stories, speeches) -->
+  <div id="docWin" class="hidden">
+    <div class="doc-head">
+      <span id="docTitle">Document</span>
+      <div class="doc-actions">
+        <button id="docCopy" data-tip="Copy" aria-label="copy">⧉</button>
+        <button id="docClose" data-tip="Close" aria-label="close">✕</button>
+      </div>
+    </div>
+    <div id="docBody"></div>
   </div>
   <!-- 4b. FEEDBACK (removed: demo-only) -->
   <div id="edgeBtns">
@@ -1377,6 +1409,36 @@ function openPopup(title, html, autoClose){
   show("popup");
   document.body.classList.add("hasPopup");
 }
+/* ================= DOCUMENT WINDOW (long-form writing) =================
+   Essays, stories, speeches, etc. open in a window on the right.
+   Copy and close buttons; that's it for now (notepad comes later). */
+function isLongFormRequest(q){
+  var t=String(q||"").toLowerCase();
+  return /\b(write|draft|compose|create|make)\b[\s\S]{0,20}\b(essay|story|stories|poem|report|speech|article|paragraph|letter)\b/.test(t);
+}
+function openDoc(title, text){
+  $("docTitle").textContent=title||"Document";
+  $("docBody").textContent=text||"";
+  show("docWin");
+}
+function closeDoc(){ hide("docWin"); }
+function doLongForm(query){
+  thinking=true;
+  $("subtitle").textContent="Writing…";
+  var sys=sysPrompt()+" Write the requested piece in full. Output ONLY the document text — no intro, no outro, no commentary.";
+  askBrain(histPrompt()+"\n\nUser request: "+query, sys).then(function(r){
+    thinking=false;
+    $("subtitle").textContent="";
+    // title from the request, shortened
+    var title=query.length>40?query.slice(0,40)+"…":query;
+    openDoc(title, r.text);
+    say("I've written it — it's in the window on the right.", "");
+  }).catch(function(){
+    thinking=false;
+    $("subtitle").textContent="";
+    say("Every brain is having a moment right now. Give it a few seconds and try again.","offline");
+  });
+}
 function closePopup(){
   if(popupClockTimer){ clearInterval(popupClockTimer); popupClockTimer=null; }
   popupAutoClose=false;
@@ -1387,6 +1449,17 @@ function closePopup(){
   p.style.left=""; p.style.top=""; p.style.right=""; p.style.transform="";
 }
 $("popupClose").onclick=function(){ closePopup(); };
+$("docClose").onclick=function(){ closeDoc(); };
+$("docCopy").onclick=function(){
+  var t=$("docBody").textContent;
+  function done(){ $("docCopy").textContent="✓"; setTimeout(function(){ $("docCopy").textContent="⧉"; },1500); }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(done,done);
+  }else{
+    var ta=document.createElement("textarea"); ta.value=t; document.body.appendChild(ta);
+    ta.select(); try{ document.execCommand("copy"); }catch(e){} document.body.removeChild(ta); done();
+  }
+};
 
 /* draggable popup: grab the header to move the window anywhere.
    The X is excluded so its click still closes. */
@@ -1468,7 +1541,7 @@ function lockedReply(q){
     return "I don't have live weather yet — that's coming soon.";
   if(/\b(give|make|show|send) me\b[\s\S]{0,15}\ba list\b|\blist of\b|\blist\b[\s\S]{0,10}\b(for|things|items)\b/.test(t))
     return "I can't build lists yet — that's coming soon.";
-  if(/\b(write|draft|compose)\b[\s\S]{0,15}\b(essay|story|poem|email|letter|report|speech|paragraph)\b|\bsend\b[\s\S]{0,15}\b(an? )?(email|text message)\b/.test(t))
+  if(/\b(write|draft|compose)\b[\s\S]{0,15}\b(email|letter)\b|\bsend\b[\s\S]{0,15}\b(an? )?(email|text message)\b/.test(t))
     return "I can't write emails yet — that's coming soon.";
   if(/\bnews\b|\bheadlines\b|\bbriefing\b/.test(t))
     return "I don't have news briefings yet — that's coming soon.";
@@ -1805,6 +1878,7 @@ function sendMessage(text){
   closePopup(); // a new question clears any stale popup
   var canned=lockedReply(text);
   if(canned){ thinking=false; say(canned,"");  return; }
+  if(isLongFormRequest(text)){ doLongForm(text); return; } // essays etc: document window on the right
   if(isTimeQ(text)){ doClock(); return; } // mini clock popup, free
   var local=localAnswer(text);
   if(local){ thinking=false; say(local,"");  return; }
