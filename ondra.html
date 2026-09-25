@@ -1267,7 +1267,14 @@ function startListening(quiet){
 }
 function toggleMic(){ if(micOn) stopMic(); else startListening(false); }
 function stopMic(){ micOn=false; try{ if(recog) recog.stop(); }catch(e){} $("micBtn").classList.remove("live"); }
+var lastAckWake=0;
 function ackWake(){
+  // debounce: Chrome sometimes fires duplicate final transcripts for one
+  // utterance — ignore a second wake within 2s so it doesn't double-ding
+  // and break the follow-up window
+  var now=Date.now();
+  if(now-lastAckWake<2000) return;
+  lastAckWake=now;
   // Bare name with no command: close any open windows first, then play
   // the chosen wake ding (chime only, like LUNA), then a short follow-up
   // window where the wake word isn't needed —
