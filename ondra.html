@@ -622,7 +622,8 @@
   .tistep-body { min-height:120px; margin-bottom:18px; }
   .tistep-preview { display:flex; flex-direction:column; align-items:center; gap:10px; margin:6px 0 18px; }
   .tistep-prevbig { width:88px; height:88px; border-radius:22px; display:flex; align-items:center; justify-content:center;
-                    border:1px solid rgba(255,255,255,.2); box-shadow:0 8px 28px rgba(0,0,0,.4); }
+                    border:1px solid rgba(255,255,255,.2); box-shadow:0 8px 28px rgba(0,0,0,.4);
+                    background:#141922; }
   .tistep-prevbig svg { width:60px; height:60px; }
   .tistep-prevlabel { font-size:12px; letter-spacing:2px; text-transform:uppercase; color:#8a93a6; }
   /* customization modal tabs */
@@ -761,7 +762,7 @@
 
     <div class="step" data-step="7">
       <h2>Tab icon</h2>
-      <p class="hint">Your AI's browser tab icon — make it yours. Use ‹ › to switch between background, icon, and color.</p>
+      <p class="hint">Your AI's browser tab icon — make it yours. Use ‹ › to switch between outline, icon, and color.</p>
       <div class="tistep-nav">
         <button class="tistep-arrow" id="wTiPrev" aria-label="previous">‹</button>
         <span class="tistep-name" id="wTiName">Background</span>
@@ -1102,14 +1103,24 @@ var TAB_ICONS = [
   {n:"chat", label:"Chat", path:"M3 4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-6 5V4z"},
   {n:"star", label:"Star", path:"M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8L12 2z"},
   {n:"moon", label:"Moon", path:"M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"},
-  {n:"orb", label:"Orb", path:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"}
+  {n:"orb", label:"Orb", path:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"},
+  {n:"diamond", label:"Diamond", path:"M12 2L2 9l10 13L22 9 12 2z"},
+  {n:"crown", label:"Crown", path:"M2 8l4 3.5L12 5l6 6.5L22 8l-2 11H4L2 8z"},
+  {n:"ghost", label:"Ghost", path:"M12 2a7 7 0 0 0-7 7v10l2.5-2.5L10 19l2-2.5L14 19l2.5-2.5L19 19V9a7 7 0 0 0-7-7z"},
+  {n:"music", label:"Music", path:"M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"},
+  {n:"flame", label:"Flame", path:"M12 2s5 4.6 5 10a5 5 0 0 1-10 0c0-2 1-3.6 2-5 .3 1 1 1.9 2 2.3C11 7.2 11.5 4.6 12 2z"},
+  {n:"leaf", label:"Leaf", path:"M20 4C12 4 5 11 4 20c9-1 16-8 16-16z"},
+  {n:"smiley", label:"Smiley", path:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM8.5 9h2v3h-2V9zm5 0h2v3h-2V9zM12 17.5c-2.2 0-4-1.2-5-3l1.6-1c.7 1.2 1.9 2 3.4 2s2.7-.8 3.4-2l1.6 1c-1 1.8-2.8 3-5 3z", rule:"evenodd"},
+  {n:"cloud", label:"Cloud", path:"M6.5 18a4.5 4.5 0 0 1-.42-8.98 6 6 0 0 1 11.6-1.4A4.75 4.75 0 0 1 17.5 18h-11z"},
+  {n:"rocket", label:"Rocket", path:"M12 2c4 3 6 7 6 11l3 4-4 1c-1 2-3 3.6-5 4.2-2-.6-4-2.2-5-4.2l-4-1 3-4c0-4 2-8 6-11z"},
+  {n:"paw", label:"Paw", path:"M12 12.5c-3 0-5.5 2.2-5.5 4.5 0 1.5 1.2 2.5 2.8 2.5 1 0 1.8-.4 2.7-.4s1.7.4 2.7.4c1.6 0 2.8-1 2.8-2.5 0-2.3-2.5-4.5-5.5-4.5zM6.2 7.4a1.7 1.7 0 1 0 3.4 0 1.7 1.7 0 1 0-3.4 0zM9.8 4.6a1.7 1.7 0 1 0 3.4 0 1.7 1.7 0 1 0-3.4 0zM14.2 4.6a1.7 1.7 0 1 0 3.4 0 1.7 1.7 0 1 0-3.4 0zM17.8 7.4a1.7 1.7 0 1 0 3.4 0 1.7 1.7 0 1 0-3.4 0z"}
 ];
-function tabIconSVG(iconName, bgColor, fgColor, size){
+function tabIconSVG(iconName, outlineColor, fgColor, size){
   var ic = TAB_ICONS.filter(function(t){ return t.n===iconName; })[0] || TAB_ICONS[0];
   var rule = ic.rule ? ' fill-rule="'+ic.rule+'"' : '';
+  // transparent background — the icon itself carries the outline; drawn large
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="'+size+'" height="'+size+'">'
-    + '<rect width="64" height="64" rx="14" fill="'+bgColor+'"/>'
-    + '<g transform="translate(14,14) scale(1.5)" fill="'+fgColor+'">'
+    + '<g transform="translate(6,6) scale(2.1667)" fill="'+fgColor+'" stroke="'+outlineColor+'" stroke-width="2.4" stroke-linejoin="round">'
     + '<path d="'+ic.path+'"'+rule+'/></g></svg>';
 }
 function setFavicon(url){
@@ -1117,9 +1128,9 @@ function setFavicon(url){
   if(!l){ l = document.createElement('link'); l.rel = 'icon'; document.head.appendChild(l); }
   l.type = 'image/png'; l.href = url;
 }
-function makeFavicon(iconName, bgName, fgName){
-  var bg = rainColor(bgName, RAINBOW[4]).c, fg = rainColor(fgName, RAINBOW[8]).c;
-  var svg = tabIconSVG(iconName, bg, fg, 64);
+function makeFavicon(iconName, outlineName, fgName){
+  var ol = rainColor(outlineName, RAINBOW[8]).c, fg = rainColor(fgName, RAINBOW[8]).c;
+  var svg = tabIconSVG(iconName, ol, fg, 64);
   var img = new Image();
   img.onload = function(){
     try{
@@ -1131,20 +1142,19 @@ function makeFavicon(iconName, bgName, fgName){
   img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
 }
 function applyTabIcon(){
-  makeFavicon(S.tabIcon||"o", S.tabBg||"blue", S.tabColor||"white");
+  makeFavicon(S.tabIcon||"o", S.tabOutline||S.tabBg||"white", S.tabColor||"white");
 }
-/* shared tab-icon stepper: < > arrows cycle Background -> Icon -> Icon color,
+/* shared tab-icon stepper: < > arrows cycle Outline -> Icon -> Icon color,
    big live preview always at the bottom. p = element id prefix, state = obj
-   holding tabIcon/tabBg/tabColor */
+   holding tabIcon/tabOutline/tabColor */
 function initTabIconStepper(p, state){
   var stepIdx=0;
-  var names=["Background","Icon","Icon color"];
+  var names=["Outline","Icon","Icon color"];
   function preview(){
-    var bg=rainColor(state.tabBg||"blue",RAINBOW[4]).c;
+    var ol=rainColor(state.tabOutline||state.tabBg||"white",RAINBOW[8]).c;
     var fg=rainColor(state.tabColor||"white",RAINBOW[8]).c;
     var pv=$(p+"Preview");
-    pv.innerHTML=tabIconSVG(state.tabIcon||"o",bg,fg,60);
-    pv.style.background=bg;
+    pv.innerHTML=tabIconSVG(state.tabIcon||"o",ol,fg,60);
   }
   function render(){
     $(p+"Name").textContent=names[stepIdx];
@@ -1166,7 +1176,7 @@ function initTabIconStepper(p, state){
       });
       body.appendChild(grid);
     }else{
-      var key=stepIdx===0?"tabBg":"tabColor";
+      var key=stepIdx===0?"tabOutline":"tabColor";
       var box=document.createElement("div"); box.className="swatches sm";
       RAINBOW.forEach(function(r){
         var d=document.createElement("div");
@@ -1190,7 +1200,7 @@ function initTabIconStepper(p, state){
   return { refresh:render };
 }
 var wiz = { step:1, name:"", voice:"female", pers:"balanced", wallpaper:"blue", orb:"pink", aura:"blue", ding:"classic",
-            tabIcon:"o", tabBg:"blue", tabColor:"white" };
+            tabIcon:"o", tabOutline:"white", tabColor:"white" };
 var wizStarted = false;
 
 function startWizard(){
@@ -1277,7 +1287,7 @@ function startWizard(){
     if(wiz.step<7){ goStep(wiz.step+1); }
     else {
       var done={name:wiz.name,voice:wiz.voice,pers:wiz.pers,wallpaper:wiz.wallpaper,orb:wiz.orb,aura:wiz.aura,ding:wiz.ding,
-                tabIcon:wiz.tabIcon,tabBg:wiz.tabBg,tabColor:wiz.tabColor};
+                tabIcon:wiz.tabIcon,tabOutline:wiz.tabOutline,tabColor:wiz.tabColor};
       saveSettings(done);
       hide("wizard");
       startHud(done, true); // first run: greet out loud
@@ -2242,7 +2252,7 @@ $("setVoice").onclick=function(){
 };
 $("menuCustom").onclick=function(){
   closeMenu();
-  themeTmp={wallpaper:S.wallpaper, orb:S.orb, aura:S.aura, tabIcon:S.tabIcon||"o", tabBg:S.tabBg||"blue", tabColor:S.tabColor||"white"};
+  themeTmp={wallpaper:S.wallpaper, orb:S.orb, aura:S.aura, tabIcon:S.tabIcon||"o", tabOutline:S.tabOutline||S.tabBg||"white", tabColor:S.tabColor||"white"};
   $("setName").value=S.name; $("setName").style.borderColor="";
   buildThemeSwatches();
   themeTab("A");
@@ -2354,7 +2364,7 @@ function popDragEnd(){ popDrag=null; document.body.classList.remove("popDragging
 })();
 
 /* ================= CHAT ================= */
-var S = { name:"Ondra", wake:"hey", voice:"female", pers:"balanced", wallpaper:"blue", orb:"pink", aura:"blue", voiceMuted:false, tabIcon:"o", tabBg:"blue", tabColor:"white" };
+var S = { name:"Ondra", wake:"hey", voice:"female", pers:"balanced", wallpaper:"blue", orb:"pink", aura:"blue", voiceMuted:false, tabIcon:"o", tabOutline:"white", tabColor:"white" };
 var thinking=false;
 
 /* ================= CONVERSATION MEMORY =================
@@ -3019,7 +3029,7 @@ function buildThemeSwatches(){
   row("setWall","wallpaper"); row("setOrb","orb"); row("setAura","aura");
 }
 var gb=$("gearBtn"); if(gb) gb.onclick=function(){
-  themeTmp={wallpaper:S.wallpaper, orb:S.orb, aura:S.aura, tabIcon:S.tabIcon||"o", tabBg:S.tabBg||"blue", tabColor:S.tabColor||"white"};
+  themeTmp={wallpaper:S.wallpaper, orb:S.orb, aura:S.aura, tabIcon:S.tabIcon||"o", tabOutline:S.tabOutline||S.tabBg||"white", tabColor:S.tabColor||"white"};
   $("setName").value=S.name; $("setName").style.borderColor="";
   buildThemeSwatches();
   show("themeModal");
@@ -3038,9 +3048,9 @@ function themeTab(which){
 $("themeTabBtnA").onclick=function(){ themeTab("A"); };
 $("themeTabBtnI").onclick=function(){ themeTab("I"); };
 $("tabIconSave").onclick=function(){
-  S.tabIcon=themeTmp.tabIcon; S.tabBg=themeTmp.tabBg; S.tabColor=themeTmp.tabColor;
+  S.tabIcon=themeTmp.tabIcon; S.tabOutline=themeTmp.tabOutline; S.tabColor=themeTmp.tabColor;
   var st=settings()||{};
-  st.tabIcon=S.tabIcon; st.tabBg=S.tabBg; st.tabColor=S.tabColor;
+  st.tabIcon=S.tabIcon; st.tabOutline=S.tabOutline; st.tabColor=S.tabColor;
   saveSettings(st);
   applyTabIcon();
   hide("themeModal");
@@ -3060,10 +3070,9 @@ $("themeSave").onclick=function(){
   var nameChanged=(nm!==S.name);
   S.name=nm;
   S.wallpaper=themeTmp.wallpaper; S.orb=themeTmp.orb; S.aura=themeTmp.aura;
-  S.tabIcon=themeTmp.tabIcon; S.tabBg=themeTmp.tabBg; S.tabColor=themeTmp.tabColor;
   saveSettings({name:S.name,voice:S.voice,pers:S.pers,
     wallpaper:S.wallpaper,orb:S.orb,aura:S.aura,ding:S.ding,voiceMuted:S.voiceMuted,
-    tabIcon:S.tabIcon,tabBg:S.tabBg,tabColor:S.tabColor});
+    tabIcon:S.tabIcon,tabOutline:S.tabOutline,tabColor:S.tabColor});
   applyTheme(S);
   applyTabIcon();
   $("hudName").textContent=S.name;
@@ -3180,7 +3189,7 @@ function startHud(st, sayHi){
   S.name=st.name; S.wake=st.wake||"hey"; S.voice=st.voice; S.pers=st.pers;
   S.wallpaper=st.wallpaper; S.orb=st.orb; S.aura=st.aura||st.orb||"blue";
   S.ding=st.ding||"classic"; S.voiceMuted=!!st.voiceMuted;
-  S.tabIcon=st.tabIcon||"o"; S.tabBg=st.tabBg||"blue"; S.tabColor=st.tabColor||"white";
+  S.tabIcon=st.tabIcon||"o"; S.tabOutline=st.tabOutline||st.tabBg||"white"; S.tabColor=st.tabColor||"white";
   updateVoiceBtn();
   applyTheme(st);
   applyTabIcon();
