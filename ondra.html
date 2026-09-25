@@ -224,12 +224,12 @@
            backdrop-filter:blur(28px) saturate(1.8);
            border:1px solid rgba(255,255,255,.1); border-top:none;
            box-shadow:0 20px 60px rgba(0,0,0,.55);
-           transform-origin:top center;
+           transform-origin:top center; will-change:transform,opacity;
            animation:menuSlide .35s cubic-bezier(.2,.9,.3,1.1); }
   #menuBar.hidden { display:none; }
-  #menuBar.closing { animation:menuRetract .3s cubic-bezier(.5,0,.8,.4); }
+  #menuBar.closing { animation:menuRetract .25s cubic-bezier(.4,0,.6,1); }
   @keyframes menuSlide { from { opacity:0; transform:scaleY(.2); } to { opacity:1; transform:scaleY(1); } }
-  @keyframes menuRetract { from { opacity:1; transform:scaleY(1); } to { opacity:0; transform:scaleY(.2); } }
+  @keyframes menuRetract { from { opacity:1; transform:scaleY(1); } to { opacity:0; transform:scaleY(.15); } }
   #menuBar button { display:flex; align-items:center; justify-content:center;
            width:42px; height:42px; border-radius:50%;
            border:1px solid rgba(255,255,255,.14);
@@ -1751,7 +1751,7 @@ function closeMenu(){
   setTimeout(function(){
     bar.classList.add("hidden");
     bar.classList.remove("closing");
-  }, 280);
+  }, 240);
 }
 $("menuBtn").onclick=function(){
   var bar=$("menuBar");
