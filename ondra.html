@@ -848,10 +848,10 @@
     <div id="linksList">
       <div class="link-row">
         <div class="link-info">
-          <div class="link-name">Gmail</div>
-          <div class="link-desc">Send emails for you</div>
+          <div class="link-name">Google</div>
+          <div class="link-desc">Gmail, Calendar, and more</div>
         </div>
-        <button class="btn" id="linkGmail">Connect</button>
+        <button class="btn" id="linkGoogle">Connect</button>
       </div>
     </div>
     <button class="btn ghost" id="linksClose">Close</button>
@@ -1807,8 +1807,8 @@ $("menuLinks").onclick=function(){
 };
 $("linksClose").onclick=function(){ hide("linksModal"); };
 $("linksModal").onclick=function(e){ if(e.target===$("linksModal")) hide("linksModal"); };
-$("linkGmail").onclick=function(){
-  say("Gmail linking is coming soon — for now I can draft emails and open your mail app to send them.");
+$("linkGoogle").onclick=function(){
+  say("Google linking is coming soon — for now I can draft emails and open your mail app to send them.");
 };
 $("notepadClose").onclick=function(){ hide("notepadModal"); };
 $("notepadModal").onclick=function(e){ if(e.target===$("notepadModal")) hide("notepadModal"); };
