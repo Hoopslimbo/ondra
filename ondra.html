@@ -974,7 +974,17 @@ var DINGS={
   bright:{t:"Bright", d:"Quick rising sparkle", play:function(){ beep(988,0.1,0); beep(1319,0.1,0.09); beep(1760,0.16,0.18); }},
   deep:{t:"Deep", d:"Low and mellow", play:function(){ beep(440,0.16,0,"triangle"); beep(330,0.24,0.15,"triangle"); }}
 };
-function playDing(name){ var d=DINGS[name]||DINGS.classic; try{ d.play(); }catch(e){} }
+function playDing(name){
+  var d=DINGS[name]||DINGS.classic;
+  // force AudioContext awake before playing — the ding must not silently fail
+  try{
+    ensureCtx();
+    if(actx&&actx.state==="suspended"){ var p=actx.resume(); if(p&&p.catch) p.catch(function(){}); }
+  }catch(e){}
+  try{ d.play(); }catch(e){}
+  // retry once after a beat in case the context was still waking up
+  setTimeout(function(){ try{ d.play(); }catch(e){} }, 400);
+}
 
 /* Emojis show in text but are never read aloud (same rule as LUNA). */
 var EMOJI_RE=/[\u{1F000}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE00}-\u{FE0F}\u{200D}\u{2190}-\u{21FF}\u{2300}-\u{23FF}]/gu;
@@ -2055,6 +2065,8 @@ function stopTalking(){
   var sub=$("subtitle"); if(sub) sub.textContent="";
 }
 function say(text, brain, prosody){
+  // strip conversation-format echoes ("User: ... Luna: ...") the brain sometimes adds
+  text=String(text||"").replace(/^\s*(User|You)\s*:\s*[\s\S]*?\b(Luna|Ondra|Gen)\s*:\s*/i,"").trim();
   pushHist("ai",text);
   var orb=$("orb");
   $("brainTag").textContent = brain ? "via "+brain : "";
