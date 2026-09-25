@@ -1939,7 +1939,8 @@ $("codeSubmit").onclick=function(){
         var _b2=settings(); if(_b2){ startHud(_b2, false); } else { startWizard(); }
       }
       // show admin button for owners
-      var _ab=$("adminBtn"); if(_ab) _ab.classList.remove("hidden");
+      // admin button stays hidden until the Admin Panel is built
+      // var _ab=$("adminBtn"); if(_ab) _ab.classList.remove("hidden");
       flashHint("Owner access unlocked.");
     }else{
       $("codeErr").textContent="Wrong code.";
@@ -2161,7 +2162,8 @@ $("q").addEventListener("keydown",function(e){ if(e.key==="Enter"){ var v=$("q")
 var _boot=settings();
 if(MAINTENANCE && isOwner()){
   hide("maintenance");
-  var _ab0=$("adminBtn"); if(_ab0) _ab0.classList.remove("hidden");
+  // admin button stays hidden until the Admin Panel is built
+  // var _ab0=$("adminBtn"); if(_ab0) _ab0.classList.remove("hidden");
   if(_boot){ startHud(_boot, false); } else { startWizard(); }
 }else if(!MAINTENANCE){
   hide("maintenance");
