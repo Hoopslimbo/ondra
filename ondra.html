@@ -1687,6 +1687,12 @@ function localAnswer(q){
     if(pers==="moody") return "Night. Don't let the bed bugs bite. Or do, I don't care.";
     return "Good night! Sleep well.";
   }
+  // thank you / thanks — simple acknowledgement, never the brain
+  if(/^(thank you|thanks|thx|ty|thankyou)\b/.test(t)){
+    if(pers==="cheerful") return "You're so welcome! Anything else I can do for you?";
+    if(pers==="moody") return "Yep.";
+    return "You're welcome!";
+  }
   if(/^(who'?s there|whos there)\b/.test(t)){
     if(pers==="moody") return "Ugh, a knock-knock joke? Fine. Knock knock.";
     return "Knock knock! Who's there?";
