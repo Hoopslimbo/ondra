@@ -1967,20 +1967,7 @@ function electricBurst(){
     if(layer.parentNode) layer.parentNode.removeChild(layer);
   },1000);
 }
-$("lbActivate").onclick=function(){
-  var b=boostState();
-  if(b.used) return;
-  lsSet("gcai_boost", JSON.stringify({used:true, at:Date.now()}));
-   
-  electricBurst();
-  // little click animation on the puzzle button with the lightning
-  var ab=$("addonBtn");
-  ab.classList.remove("clicked"); void ab.offsetWidth; ab.classList.add("clicked");
-  setTimeout(function(){ ab.classList.remove("clicked"); },350);
-  pulseOrb();
-  flashHint("LIMIT BREAK active — unlimited requests for the next 10 minutes.");
-  speak("Limit break active. Unlimited requests for the next ten minutes.", null, null);
-};
+/* lbActivate removed — LIMIT BREAK was demo-only */
 
 /* ================= THEME SETTINGS (post-setup) ================= */
 var themeTmp=null;
@@ -2108,16 +2095,7 @@ function wlSubmit(nameId,emailId,errId,okFn){
 
 
 
-$("copyCode").onclick=function(){
-  var t=$("codeBox").textContent;
-  function done(){ $("copyCode").textContent="Copied"; setTimeout(function(){ $("copyCode").textContent="Copy code"; },2000); }
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(t).then(done,done);
-  } else {
-    var ta=document.createElement("textarea"); ta.value=t; document.body.appendChild(ta);
-    ta.select(); try{ document.execCommand("copy"); }catch(e){} document.body.removeChild(ta); done();
-  }
-};
+/* copyCode removed — demo-only code display */
 
 /* ================= HUD INIT ================= */
 function applyTheme(st){
