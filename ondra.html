@@ -478,6 +478,30 @@
   #emailBar button:hover { transform:translateY(-1px); }
   #emailSend:hover { border-color:#34c759; color:#34c759; }
   #emailDiscard:hover { border-color:#ff6b6b; color:#ff6b6b; }
+  /* calendar */
+  #calWin { position:fixed; right:18px; top:50%; transform:translateY(-50%); width:480px; max-width:calc(100vw - 36px);
+           max-height:80vh; overflow:hidden; display:flex; flex-direction:column; z-index:80; border-radius:24px;
+           background:
+             linear-gradient(160deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.03) 28%, rgba(255,255,255,0) 55%),
+             rgba(16,20,29,.58);
+           -webkit-backdrop-filter:blur(24px) saturate(1.7);
+           backdrop-filter:blur(24px) saturate(1.7);
+           border:1px solid rgba(255,255,255,.2);
+           box-shadow:0 16px 56px rgba(0,0,0,.5),
+                      inset 0 1px 1px rgba(255,255,255,.35),
+                      inset 0 -1px 1px rgba(255,255,255,.08);
+           padding:18px 20px 22px; animation:popIn .32s ease; }
+  #calWin.hidden { display:none; }
+  #calGrid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; overflow-y:auto; }
+  .cal-dow { color:#8a93a6; font-size:11px; text-align:center; padding:4px 0; font-weight:600; }
+  .cal-day { min-height:52px; border-radius:10px; padding:4px 6px; font-size:12px; color:#dfe5ef;
+           background:rgba(255,255,255,.03); border:1px solid transparent; overflow:hidden; }
+  .cal-day.other { opacity:.3; }
+  .cal-day.today { border-color:#8ab4ff; background:rgba(138,180,255,.1); }
+  .cal-day .dnum { font-weight:600; font-size:13px; }
+  .cal-day .ev { font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+           background:rgba(138,180,255,.2); border-radius:4px; padding:1px 4px; margin-top:2px; }
+  .cal-day .ev.hol { background:rgba(52,199,89,.2); }
   #popup.hidden { display:none; }
   @keyframes popIn { from { opacity:0; transform:translateY(-50%) translateX(24px); } to { opacity:1; transform:translateY(-50%); } }
   .popup-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;
@@ -709,9 +733,10 @@
       <button id="gearBtn" data-tip="Settings" aria-label="Settings"><span class="gear-ico">&#9881;</span></button>
   <!-- feature menu: thin oval rail, icons only, names on hover -->
   <div id="menuBar" class="hidden">
+    <button id="menuLinks" data-tip="Linked Accounts" aria-label="Linked Accounts"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span class="tip">Linked Accounts</span></button>
     <button id="menuAddon" data-tip="Add-ons" aria-label="Add-ons"><svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true"><rect x="5" y="7" width="13" height="12" rx="2.5"/><circle cx="11.5" cy="7" r="3"/><circle cx="18" cy="13" r="3"/></svg><span class="tip">Add-ons</span></button>
     <button id="menuNotes" data-tip="Notepad" aria-label="Notepad"><svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true"><path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h10V5H7z"/><rect x="8.5" y="1.5" width="1.6" height="4" rx="0.8"/><rect x="11.2" y="1.5" width="1.6" height="4" rx="0.8"/><rect x="13.9" y="1.5" width="1.6" height="4" rx="0.8"/><rect x="8" y="9" width="8" height="1.4" rx="0.7"/><rect x="8" y="12" width="8" height="1.4" rx="0.7"/><rect x="8" y="15" width="5" height="1.4" rx="0.7"/></svg><span class="tip">Notepad</span></button>
-    <button id="menuLinks" data-tip="Linked Accounts" aria-label="Linked Accounts"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span class="tip">Linked Accounts</span></button>
+    <button id="menuCal" data-tip="Calendar" aria-label="Calendar"><svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true"><path d="M7 2v2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7zm12 8v8H5v-8h14z"/></svg><span class="tip">Calendar</span></button>
   </div>
     </div>
   </div>
@@ -763,6 +788,18 @@
       <button id="emailSend">Send</button>
       <button id="emailDiscard">Discard</button>
     </div>
+  </div>
+  <!-- 4f. CALENDAR -->
+  <div id="calWin" class="hidden">
+    <div class="doc-head">
+      <span id="calTitle">Calendar</span>
+      <div class="doc-actions">
+        <button id="calPrev" data-tip="Previous month" aria-label="previous">‹</button>
+        <button id="calNext" data-tip="Next month" aria-label="next">›</button>
+        <button id="calClose" data-tip="Close" aria-label="close">✕</button>
+      </div>
+    </div>
+    <div id="calGrid"></div>
   </div>
   <!-- 4b. FEEDBACK (removed: demo-only) -->
   <div id="edgeBtns">
@@ -1767,7 +1804,170 @@ function openNotepad(){
   }
   show("notepadModal");
 }
-/* ================= FEATURE MENU ================= */
+/* ================= GOOGLE + CALENDAR ================= */
+// Google OAuth client ID — Liam must create this in Google Cloud Console
+var GOOGLE_CLIENT_ID="";
+var gToken=null; // OAuth access token (memory only)
+var calEvents=[]; // cached events for the visible month
+var calYear=0, calMonth=0;
+var pendingCalAdd=null; // {date} — set when we asked "what's the event?"
+
+function googleLinked(){ return !!gToken; }
+
+// load Google Identity Services
+(function(){
+  var s=document.createElement("script");
+  s.src="https://accounts.google.com/gsi/client";
+  s.async=true; s.defer=true;
+  document.head.appendChild(s);
+})();
+
+function linkGoogle(){
+  if(!GOOGLE_CLIENT_ID){ say("I need a Google client ID set up first — ask Liam to add it."); return; }
+  try{
+    var client=google.accounts.oauth2.initTokenClient({
+      client_id:GOOGLE_CLIENT_ID,
+      scope:"https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/gmail.send",
+      callback:function(resp){
+        if(resp.access_token){
+          gToken=resp.access_token;
+          $("linkGoogle").textContent="Connected";
+          say("Google account linked. You can now ask me to open your calendar or send emails.");
+        }
+      }
+    });
+    client.requestAccessToken({prompt:"consent"});
+  }catch(e){ say("Couldn't start Google sign-in. Try again."); }
+}
+$("linkGoogle").onclick=function(){ linkGoogle(); };
+
+function calApi(path, method, body){
+  return fetch("https://www.googleapis.com/calendar/v3"+path, {
+    method:method||"GET",
+    headers:{ "Authorization":"Bearer "+gToken, "Content-Type":"application/json" },
+    body:body?JSON.stringify(body):undefined
+  }).then(function(r){ return r.json(); });
+}
+
+function openCalendar(){
+  if(!googleLinked()){
+    say("Link your Google account first — open the menu, tap the chain icon, and hit Connect.");
+    show("linksModal");
+    return;
+  }
+  var now=new Date();
+  calYear=now.getFullYear(); calMonth=now.getMonth();
+  show("calWin");
+  loadCalMonth();
+  say("Here's your calendar.");
+}
+
+function loadCalMonth(){
+  $("calTitle").textContent=new Date(calYear,calMonth,1).toLocaleDateString(undefined,{month:"long",year:"numeric"});
+  var first=new Date(calYear,calMonth,1);
+  var start=new Date(first); start.setDate(start.getDate()-first.getDay());
+  var end=new Date(calYear,calMonth+1,0); end.setDate(end.getDate()+ (6-end.getDay()));
+  var tmin=start.toISOString(), tmax=end.toISOString();
+  Promise.all([
+    calApi("/calendars/primary/events?timeMin="+encodeURIComponent(tmin)+"&timeMax="+encodeURIComponent(tmax)+"&singleEvents=true&orderBy=startTime"),
+    calApi("/calendars/en.usa%23holiday%40group.v.calendar.google.com/events?timeMin="+encodeURIComponent(tmin)+"&timeMax="+encodeURIComponent(tmax)+"&singleEvents=true")
+  ]).then(function(rs){
+    calEvents=[];
+    (rs[0].items||[]).forEach(function(e){ calEvents.push({ev:e, hol:false}); });
+    (rs[1].items||[]).forEach(function(e){ calEvents.push({ev:e, hol:true}); });
+    renderCalMonth();
+  }).catch(function(){ renderCalMonth(); });
+}
+
+function renderCalMonth(){
+  var grid=$("calGrid"); grid.innerHTML="";
+  ["S","M","T","W","T","F","S"].forEach(function(d){
+    var el=document.createElement("div"); el.className="cal-dow"; el.textContent=d; grid.appendChild(el);
+  });
+  var first=new Date(calYear,calMonth,1);
+  var start=new Date(first); start.setDate(start.getDate()-first.getDay());
+  var today=new Date(); today.setHours(0,0,0,0);
+  for(var i=0;i<42;i++){
+    var dt=new Date(start); dt.setDate(dt.getDate()+i);
+    var cell=document.createElement("div");
+    cell.className="cal-day";
+    if(dt.getMonth()!==calMonth) cell.classList.add("other");
+    if(dt.getTime()===today.getTime()) cell.classList.add("today");
+    var num=document.createElement("div"); num.className="dnum"; num.textContent=dt.getDate();
+    cell.appendChild(num);
+    var dayStr=dt.toISOString().slice(0,10);
+    calEvents.forEach(function(ce){
+      var s=ce.ev.start&&(ce.ev.start.date||ce.ev.start.dateTime||"").slice(0,10);
+      if(s===dayStr){
+        var ev=document.createElement("div");
+        ev.className="ev"+(ce.hol?" hol":"");
+        ev.textContent=ce.ev.summary||"";
+        cell.appendChild(ev);
+      }
+    });
+    grid.appendChild(cell);
+  }
+}
+$("calPrev").onclick=function(){ calMonth--; if(calMonth<0){calMonth=11;calYear--;} loadCalMonth(); };
+$("calNext").onclick=function(){ calMonth++; if(calMonth>11){calMonth=0;calYear++;} loadCalMonth(); };
+$("calClose").onclick=function(){ hide("calWin"); };
+$("menuCal").onclick=function(){ closeMenu(); openCalendar(); };
+
+// calendar voice intents
+function isCalOpenQ(q){ return /\b(open|show|view|see|display)\b[\s\S]{0,20}?\bcalendar\b/i.test(q); }
+function isCalAddQ(q){ return /\b(add|schedule|put|create)\b/i.test(q) && /\b(calendar|event|meeting|appointment)\b/i.test(q); }
+
+function parseCalDate(q){
+  // "December 19th", "Dec 19", "tomorrow", "next Friday"
+  var now=new Date(), y=now.getFullYear();
+  var m=q.match(/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2})/i);
+  if(m){
+    var months={january:0,february:1,march:2,april:3,may:4,june:5,july:6,august:7,september:8,october:9,november:10,december:11};
+    var d=new Date(y, months[m[1].toLowerCase()], parseInt(m[2],10));
+    if(d<now) d.setFullYear(y+1);
+    return d;
+  }
+  if(/\btomorrow\b/i.test(q)){ var t=new Date(now); t.setDate(t.getDate()+1); return t; }
+  if(/\btoday\b/i.test(q)) return now;
+  return null;
+}
+
+function addCalEvent(title, date){
+  // random midday time: 11am–2pm
+  var hr=11+Math.floor(Math.random()*4);
+  var start=new Date(date); start.setHours(hr,0,0,0);
+  var end=new Date(start); end.setHours(hr+1,0,0,0);
+  return calApi("/calendars/primary/events", "POST", {
+    summary:title,
+    start:{dateTime:start.toISOString()},
+    end:{dateTime:end.toISOString()}
+  });
+}
+
+function doCalAdd(query){
+  if(!googleLinked()){
+    say("Link your Google account first — open the menu, tap the chain icon, and hit Connect.");
+    show("linksModal");
+    return;
+  }
+  var date=parseCalDate(query);
+  // extract event title: "add X to December 19th" or "add X on December 19th"
+  var title="";
+  var tm=query.match(/\badd\b\s+(.+?)\s+(?:to|on|for)\s+/i);
+  if(tm) title=tm[1].trim();
+  if(!title){
+    // vague: "add an event" — ask what it is; the ? triggers ding + listen window,
+    // and sendMessage routes the answer back here via pendingCalAdd
+    pendingCalAdd={date:parseCalDate(query)};
+    say("What's the event?");
+    return;
+  }
+  if(!date) date=new Date();
+  addCalEvent(title,date).then(function(){
+    say("Added "+title+".");
+    if(!$("calWin").classList.contains("hidden")) loadCalMonth();
+  }).catch(function(){ say("Couldn't add that — try again."); });
+}
 function closeMenu(){
   var bar=$("menuBar");
   if(bar.classList.contains("hidden")||bar.classList.contains("closing")) return;
@@ -2295,6 +2495,18 @@ function sendMessage(text){
   if(!$("welcomeModal").classList.contains("hidden")) return; // welcome must be dismissed first
   text=String(text||"").trim();
   if(!text||thinking) return;
+
+  // pending calendar add: the last turn asked "what's the event?"
+  if(pendingCalAdd){
+    var p=pendingCalAdd; pendingCalAdd=null;
+    var d=parseCalDate(text)||p.date||new Date();
+    var t=text.replace(/\b(on|to|for)\s+(january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}.*/i,"").trim()||"New event";
+    addCalEvent(t,d).then(function(){
+      say("Added "+t+".");
+      if(!$("calWin").classList.contains("hidden")) loadCalMonth();
+    }).catch(function(){ say("Couldn't add that — try again."); });
+    return;
+  }
   
   pushHist("user",text);
   unlockAudio();
@@ -2312,6 +2524,8 @@ function sendMessage(text){
   if(canned && !isLongFormRequest(text)){ thinking=false; say(canned,"");  return; }
   if(isLongFormRequest(text)){ doLongForm(text); return; } // essays etc: document window on the right
   if(isEmailQ(text)){ doEmail(text); return; } // email: composer window on the right
+  if(isCalOpenQ(text)){ openCalendar(); return; } // calendar: month window on the right
+  if(isCalAddQ(text)){ doCalAdd(text); return; } // calendar: add event
   if(isTimeQ(text)){ doClock(); return; } // mini clock popup, free
   var local=localAnswer(text);
   if(local){ thinking=false; say(local,"");  return; }
