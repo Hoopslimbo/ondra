@@ -205,7 +205,7 @@
   .req-pill b { color:#8ab4ff; }
   /* top-right feature menu */
   /* top-right feature menu: button + rail are one connected piece */
-  #menuBtn { position:fixed; top:16px; right:22px; z-index:96; width:56px; height:56px; border-radius:50%;
+  #menuBtn { position:fixed; top:16px; right:22px; z-index:96; width:64px; height:64px; border-radius:50%;
               cursor:pointer; background:rgba(18,22,32,.72);
               -webkit-backdrop-filter:blur(28px) saturate(1.8); backdrop-filter:blur(28px) saturate(1.8);
               border:1px solid rgba(255,255,255,.1);
@@ -216,9 +216,9 @@
   #menuBtn svg { transition:transform .25s ease; }
   #menuBtn.open { border-radius:28px 28px 0 0; border-bottom:none; }
   #menuBtn.open svg { transform:rotate(180deg); }
-  #menuBar { position:fixed; top:72px; right:22px; bottom:24px; z-index:95; display:flex; flex-direction:column;
-           align-items:center; gap:6px; padding:16px 10px 14px; width:56px;
-           border-radius:0 0 28px 28px;
+  #menuBar { position:fixed; top:80px; right:22px; bottom:24px; z-index:95; display:flex; flex-direction:column;
+           align-items:center; gap:10px; padding:18px 10px 16px; width:64px;
+           border-radius:0 0 32px 32px;
            background:rgba(18,22,32,.72);
            -webkit-backdrop-filter:blur(28px) saturate(1.8);
            backdrop-filter:blur(28px) saturate(1.8);
@@ -231,7 +231,7 @@
   @keyframes menuSlide { from { opacity:0; transform:scaleY(.2); } to { opacity:1; transform:scaleY(1); } }
   @keyframes menuRetract { from { opacity:1; transform:scaleY(1); } to { opacity:0; transform:scaleY(.15); } }
   #menuBar button { display:flex; align-items:center; justify-content:center;
-           width:42px; height:42px; border-radius:50%;
+           width:48px; height:48px; border-radius:50%;
            border:1px solid rgba(255,255,255,.14);
            background:linear-gradient(160deg, rgba(255,255,255,.1) 0%, rgba(255,255,255,.03) 100%);
            -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
