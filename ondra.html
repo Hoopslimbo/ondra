@@ -4,7 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ondra</title>
-<!-- GCAI DEMO v34.5 — 2026-09-24: feedback now posts to the "Ondra feedback"
+<!-- GCAI DEMO v34.6 — 2026-09-25: Google OAuth client ID wired in —
+     Linked Accounts Google Connect now works (Gmail + Calendar, testing mode).
+     GCAI DEMO v34.5 — 2026-09-24: feedback now posts to the "Ondra feedback"
      Google Form owned by the GCAI account (the old one was under Liam's
      personal account); weather is a full-version thing now —
      every weather ask gets the Ondra upsell instead of a lookup (the live
@@ -2130,8 +2132,9 @@ function openNotepad(){
   show("notepadModal");
 }
 /* ================= GOOGLE + CALENDAR ================= */
-// Google OAuth client ID — Liam must create this in Google Cloud Console
-var GOOGLE_CLIENT_ID="";
+// Google OAuth client ID — created 2026-09-25 in Google Cloud Console
+// (project "Ondra", GCAI account; Gmail + Calendar scopes, testing mode)
+var GOOGLE_CLIENT_ID="913565937624-mo55ro1ri3lsj55o7634mt8akip49da1.apps.googleusercontent.com";
 var gToken=null; // OAuth access token (memory only)
 var calEvents=[]; // cached events for the visible month
 var calYear=0, calMonth=0;
