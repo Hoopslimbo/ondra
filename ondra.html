@@ -730,7 +730,6 @@
   <div class="hud-top">
     <div class="who"><span id="hudName">Ondra</span><small id="hudSub">Ondra</small></div>
     <div>
-      <button id="gearBtn" data-tip="Customization" aria-label="Customization"><svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.65-.75 1.65-1.69 0-.44-.18-.84-.44-1.13-.26-.29-.43-.68-.43-1.12 0-.94.76-1.7 1.7-1.7h2.34c2.86 0 5.18-2.32 5.18-5.18C22 6.5 17.5 2 12 2zm-6.5 9a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4-3.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4.5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3.5 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg></button>
   <!-- feature menu: thin oval rail, icons only, names on hover -->
   <div id="menuBar" class="hidden">
     <button id="menuAddon" aria-label="Add-ons"><svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true"><rect x="5" y="7" width="13" height="12" rx="2.5"/><circle cx="11.5" cy="7" r="3"/><circle cx="18" cy="13" r="3"/></svg><span class="tip">Add-ons</span></button>
@@ -2809,7 +2808,7 @@ function buildThemeSwatches(){
   }
   row("setWall","wallpaper"); row("setOrb","orb"); row("setAura","aura");
 }
-$("gearBtn").onclick=function(){
+var gb=$("gearBtn"); if(gb) gb.onclick=function(){
   themeTmp={wallpaper:S.wallpaper, orb:S.orb, aura:S.aura};
   $("setName").value=S.name; $("setName").style.borderColor="";
   buildThemeSwatches();
