@@ -2272,9 +2272,11 @@ function applyTheme(st){
   var w=rainColor(st.wallpaper,RAINBOW[4]);
   var o=rainColor(st.orb,RAINBOW[6]);
   var a=rainColor(st.aura,o);
-  // the whole wallpaper is the chosen color, fading to white around the edges
+  // the whole wallpaper is the chosen color, fading around the edges —
+  // dark wallpapers fade to black, light ones fade to white
+  var edge=wallLum(w.c)>0.6?"#ffffff":"#000000";
   document.body.style.background =
-    "radial-gradient(125% 125% at 50% 40%, "+w.c+" 0%, "+w.c+" 42%, #ffffff 100%)";
+    "radial-gradient(125% 125% at 50% 40%, "+w.c+" 0%, "+w.c+" 42%, "+edge+" 100%)";
   // light wallpapers get dark HUD text so everything stays readable
   document.body.classList.toggle("light-wall", wallLum(w.c)>0.6);
   var orb=$("orb");
