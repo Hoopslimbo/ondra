@@ -1515,7 +1515,12 @@ function doSay(sq){
    general knowledge on Wikipedia (counts as one request). Anything Wikipedia
    can't answer falls back to the brain chain. */
 function localAnswer(q){
-  var t=String(q||"").toLowerCase();
+  var t=String(q||"").toLowerCase().trim();
+  // greetings — never Wikipedia these
+  if(/^(what'?s up|whats up|what up|sup|hey|hi|hello|yo)\b/.test(t)){
+    var greetings=["Hey! What's going on?","Hey there!","Hi! How can I help?","Hey! Good to see you."];
+    return greetings[Math.floor(Math.random()*greetings.length)];
+  }
   // (time questions are handled by the clock popup in doClock — not here)
   if(/\bwhat day is (it|today)\b|\bwhat's today\b|\btoday's date\b|\bwhat (is the )?date today\b|\bday of the week is it\b/.test(t)){
     return "Today is "+new Date().toLocaleDateString([], {weekday:"long", month:"long", day:"numeric", year:"numeric"})+".";
@@ -1529,6 +1534,7 @@ function lookupQuery(q){
     var topic=m[1].trim();
     if(!topic) return null;
     if(/^(you|your|yourself)\b/i.test(topic)) return null; // self questions stay with the brain
+    if(/^(up|down|it|this|that|there|here)$/i.test(topic)) return null; // greetings like "what's up" stay with the brain
     if(/\d/.test(topic) && /[+\-*/%^]|percent|\bof\b/.test(topic)) return null; // math stays with the brain
     return {q:topic, dict:false};
   }
