@@ -1566,7 +1566,9 @@ function sysPrompt(){
     "If the prompt starts with recent conversation, use it for context on follow-ups "+
     "(yes / no / why / tell me more / what about...) — but if the user changes the topic, "+
     "starts a new question, or says stop, treat it as a new topic, not a follow-up. "+
-    "You can answer time/date questions from the device clock and look up general knowledge.";
+    "You can answer time/date questions from the device clock and look up general knowledge. "+
+    "When the user asks for key points, tips, steps, reasons, or a list of anything, "+
+    "always format the answer as a clear bulleted or numbered list — never a paragraph.";
   if(S.pers==="cheerful")
     return base+" Personality: cheerful, upbeat, warm, genuinely enthusiastic. Light humor welcome.";
   if(S.pers==="moody")
