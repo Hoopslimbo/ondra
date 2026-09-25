@@ -656,8 +656,8 @@
   </div>
 </div>
 
-<!-- 0. MAINTENANCE — shown when the site is closed. Code button still works. -->
-<div id="maintenance" class="screen hidden">
+<!-- 0. MAINTENANCE — shown by default. JS hides it for owners. -->
+<div id="maintenance" class="screen">
   <div class="panel fadein">
     <div class="brand">ONDRA</div>
     <h2>Under maintenance</h2>
@@ -1933,12 +1933,14 @@ $("codeSubmit").onclick=function(){
     if(h===OWNER_CODE_HASH && OWNER_CODE_HASH!==""){
       setOwner(true);
       hide("codeModal");
-      flashHint("Owner access unlocked.");
-      // if maintenance was showing, let them in
-      if(MAINTENANCE && !$("maintenance").classList.contains("hidden")){
+      // if maintenance is showing, hide it and enter the app
+      if(MAINTENANCE){
         hide("maintenance");
-        var _b=settings(); if(_b){ startHud(_b, false); } else { startWizard(); }
+        var _b2=settings(); if(_b2){ startHud(_b2, false); } else { startWizard(); }
       }
+      // show admin button for owners
+      var _ab=$("adminBtn"); if(_ab) _ab.classList.remove("hidden");
+      flashHint("Owner access unlocked.");
     }else{
       $("codeErr").textContent="Wrong code.";
     }
@@ -2174,11 +2176,18 @@ updateVoiceBtn();
 $("sendBtn").onclick=function(){ var v=$("q").value; $("q").value=""; sendMessage(v); };
 $("q").addEventListener("keydown",function(e){ if(e.key==="Enter"){ var v=$("q").value; $("q").value=""; sendMessage(v); } });
 
-// boot: maintenance gate — owners go straight in, everyone else sees the notice
+// boot: maintenance gate — owners bypass, everyone else sees the notice
+// (maintenance is visible by default in HTML; hide it for owners)
 var _boot=settings();
-if(MAINTENANCE && !isOwner()){
-  show("maintenance");
-}else if(_boot){ startHud(_boot, false); } else { startWizard(); }
+if(MAINTENANCE && isOwner()){
+  hide("maintenance");
+  var _ab0=$("adminBtn"); if(_ab0) _ab0.classList.remove("hidden");
+  if(_boot){ startHud(_boot, false); } else { startWizard(); }
+}else if(!MAINTENANCE){
+  hide("maintenance");
+  if(_boot){ startHud(_boot, false); } else { startWizard(); }
+}
+// if MAINTENANCE and not owner: maintenance stays visible (default)
 
 })();
 </script>
