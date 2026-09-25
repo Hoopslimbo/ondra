@@ -2011,7 +2011,9 @@ $("gearBtn").onclick=function(){
 $("themeCancel").onclick=function(){ hide("themeModal"); };
 $("themeModal").onclick=function(e){ if(e.target===$("themeModal")) hide("themeModal"); };
 /* ---------- welcome (first run) ---------- */
-$("welcomeClose").onclick=function(){ hide("welcomeModal"); lsSet("gcai_seenWelcome","1"); };
+function closeWelcome(){ hide("welcomeModal"); try{ lsSet("gcai_seenWelcome","1"); }catch(e){} }
+$("welcomeClose").onclick=function(){ closeWelcome(); };
+$("welcomeModal").onclick=function(e){ if(e.target===$("welcomeModal")) closeWelcome(); };
 function maybeWelcome(){
   if(!lsGet("gcai_seenWelcome")) show("welcomeModal");
 }
