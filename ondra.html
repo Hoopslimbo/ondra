@@ -1429,8 +1429,21 @@ function doLongForm(query){
   askBrain(histPrompt()+"\n\nUser request: "+query, sys).then(function(r){
     thinking=false;
     $("subtitle").textContent="";
-    // title from the request, shortened
-    var title=query.length>40?query.slice(0,40)+"…":query;
+    // title: extract the topic, not the full command
+    // "write an essay on George Washington" -> "George Washington"
+    var title=query;
+    var m=query.match(/\b(?:write|draft|compose|create|make)\b[\s\S]{0,20}?\b(?:an?|the)\b\s+(essay|story|stories|poem|report|speech|article|paragraph)\b\s+(?:on|about|for)\s+(.+?)[?.!]*$/i);
+    if(m&&m[2]){
+      var topic=m[2].trim();
+      var kind=m[1].toLowerCase();
+      kind=kind.charAt(0).toUpperCase()+kind.slice(1);
+      title=kind+": "+topic.charAt(0).toUpperCase()+topic.slice(1);
+    }else{
+      // fallback: strip command verbs
+      title=query.replace(/^(please\s+)?(write|draft|compose|create|make)\s+(me\s+)?(an?\s+)?/i,"").trim();
+      title=title.charAt(0).toUpperCase()+title.slice(1);
+      if(title.length>50) title=title.slice(0,50)+"…";
+    }
     openDoc(title, r.text);
     say("I've written it — it's in the window on the right.", "");
   }).catch(function(){
