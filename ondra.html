@@ -734,6 +734,7 @@
   <!-- feature menu: thin oval rail, icons only, names on hover -->
   <div id="menuBar" class="hidden">
     <button id="menuLinks" data-tip="Linked Accounts" aria-label="Linked Accounts"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span class="tip">Linked Accounts</span></button>
+    <button id="menuCustom" data-tip="Customization" aria-label="Customization"><svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.65-.75 1.65-1.69 0-.44-.18-.84-.44-1.13-.26-.29-.43-.68-.43-1.12 0-.94.76-1.7 1.7-1.7h2.34c2.86 0 5.18-2.32 5.18-5.18C22 6.5 17.5 2 12 2zm-6.5 9a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4-3.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4.5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3.5 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg><span class="tip">Customization</span></button>
     <button id="menuAddon" data-tip="Add-ons" aria-label="Add-ons"><svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true"><rect x="5" y="7" width="13" height="12" rx="2.5"/><circle cx="11.5" cy="7" r="3"/><circle cx="18" cy="13" r="3"/></svg><span class="tip">Add-ons</span></button>
     <button id="menuNotes" data-tip="Notepad" aria-label="Notepad"><svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true"><path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h10V5H7z"/><rect x="8.5" y="1.5" width="1.6" height="4" rx="0.8"/><rect x="11.2" y="1.5" width="1.6" height="4" rx="0.8"/><rect x="13.9" y="1.5" width="1.6" height="4" rx="0.8"/><rect x="8" y="9" width="8" height="1.4" rx="0.7"/><rect x="8" y="12" width="8" height="1.4" rx="0.7"/><rect x="8" y="15" width="5" height="1.4" rx="0.7"/></svg><span class="tip">Notepad</span></button>
     <button id="menuCal" data-tip="Calendar" aria-label="Calendar"><svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true"><path d="M7 2v2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7zm12 8v8H5v-8h14z"/></svg><span class="tip">Calendar</span></button>
@@ -804,8 +805,6 @@
   </div>
   <!-- 4b. FEEDBACK (removed: demo-only) -->
   <div id="edgeBtns">
-    <button id="micBtn" data-tip="Microphone" aria-label="mute or unmute microphone"><span class="dot"></span></button>
-    <button id="voiceMuteBtn" data-tip="AI voice" aria-label="mute or unmute AI voice"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="#8ab4ff"/><path d="M16.5 8.5a5 5 0 010 7" stroke="#8ab4ff" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M19 6a8.5 8.5 0 010 12" stroke="#8ab4ff" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/></svg></button>
   </div>
   <div class="typebar">
     <input id="q" placeholder="Ask anything..." autocomplete="off">
@@ -1495,12 +1494,12 @@ function startListening(quiet){
       }
       /* "no-speech" and "aborted" are normal; stay listening. */
     };
-    recog.start(); micOn=true; $("micBtn").classList.add("live");
+    recog.start(); micOn=true; var mb=$("micBtn"); if(mb) mb.classList.add("live");
     flashHint('Listening — say "Hey '+S.name+'" or just "'+S.name+'".');
   }catch(e){ flashHint("Couldn't start the mic — type instead."); }
 }
 function toggleMic(){ if(micOn) stopMic(); else startListening(false); }
-function stopMic(){ micOn=false; try{ if(recog) recog.stop(); }catch(e){} $("micBtn").classList.remove("live"); }
+function stopMic(){ micOn=false; try{ if(recog) recog.stop(); }catch(e){} var mb=$("micBtn"); if(mb) mb.classList.remove("live"); }
 var lastAckWake=0;
 function ackWake(){
   // debounce: Chrome sometimes fires duplicate final transcripts for one
@@ -2025,8 +2024,22 @@ $("menuSettings").onclick=function(){
 };
 $("settingsClose").onclick=function(){ hide("settingsModal"); };
 $("settingsModal").onclick=function(e){ if(e.target===$("settingsModal")) hide("settingsModal"); };
-$("setMic").onclick=function(){ $("micBtn").click(); };
-$("setVoice").onclick=function(){ $("voiceMuteBtn").click(); };
+$("setMic").onclick=function(){ toggleMic(); };
+$("setVoice").onclick=function(){
+  S.voiceMuted=!S.voiceMuted;
+  if(S.voiceMuted){ // stop any speech already playing
+    try{ if(window.speechSynthesis) speechSynthesis.cancel(); }catch(e){}
+    stopNetAudio();
+  }
+  var st=settings()||{}; st.voiceMuted=S.voiceMuted; saveSettings(st);
+};
+$("menuCustom").onclick=function(){
+  closeMenu();
+  themeTmp={wallpaper:S.wallpaper, orb:S.orb, aura:S.aura};
+  $("setName").value=S.name; $("setName").style.borderColor="";
+  buildThemeSwatches();
+  show("themeModal");
+};
 $("linksClose").onclick=function(){ hide("linksModal"); };
 $("linksModal").onclick=function(e){ if(e.target===$("linksModal")) hide("linksModal"); };
 $("linkGoogle").onclick=function(){
@@ -2954,9 +2967,9 @@ function startHud(st, sayHi){
     setTimeout(function(){ say(greet,""); },600);
   }
 }
-$("micBtn").onclick=toggleMic;
-function updateVoiceBtn(){ $("voiceMuteBtn").classList.toggle("muted", !!S.voiceMuted); }
-$("voiceMuteBtn").onclick=function(){
+var mb2=$("micBtn"); if(mb2) mb2.onclick=toggleMic;
+function updateVoiceBtn(){ var vb=$("voiceMuteBtn"); if(vb) vb.classList.toggle("muted", !!S.voiceMuted); }
+var vb2=$("voiceMuteBtn"); if(vb2) vb2.onclick=function(){
   S.voiceMuted=!S.voiceMuted;
   if(S.voiceMuted){ // stop any speech already playing
     try{ if(window.speechSynthesis) speechSynthesis.cancel(); }catch(e){}
