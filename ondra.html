@@ -1152,6 +1152,17 @@ function wakeMatch(transcript, name){
     if(w&&w.length>3&&w.indexOf("hey")===0&&editDist(w.slice(3),nmc)<=1)
       return {hit:true, rest:words.slice(i+1).join(" ").trim()};
   }
+  // Unusual names like "Ondra" get misheard ("andra", "honda", "on dra"):
+  // accept any single word within 1 edit of the name (2 edits for long names).
+  // Only when the name is distinctive (4+ chars) to avoid false triggers.
+  if(nmc.length>=4){
+    var maxEd=nmc.length>=7?2:1;
+    for(var j=0;j<words.length;j++){
+      var w2=words[j];
+      if(w2&&w2.length>=3&&editDist(w2,nmc)<=maxEd)
+        return {hit:true, rest:words.slice(j+1).join(" ").trim()};
+    }
+  }
   return {hit:false, rest:transcript};
 }
 // Pure decision for voice input — tested below.
@@ -1517,29 +1528,53 @@ function doSay(sq){
    can't answer falls back to the brain chain. */
 function localAnswer(q){
   var t=String(q||"").toLowerCase().trim();
-  // greetings & small talk — never Wikipedia these
+  var pers=S.pers||"balanced";
+  // greetings & small talk — never Wikipedia these. Personality-aware.
   if(/^(what'?s up|whats up|what up|sup|hey|hi|hello|yo|hiya|howdy)\b/.test(t)){
-    var greetings=["Hey! What's going on?","Hey there!","Hi! How can I help?","Hey! Good to see you."];
-    return greetings[Math.floor(Math.random()*greetings.length)];
+    if(pers==="cheerful"){
+      var c=["Hey! So good to see you! What's up?","Hiya! I'm having a great day — how about you?","Hey hey! What's going on?"];
+      return c[Math.floor(Math.random()*c.length)];
+    }
+    if(pers==="moody"){
+      var m=["Oh. Hey.","What do you want?","Hey. Make it quick."];
+      return m[Math.floor(Math.random()*m.length)];
+    }
+    var b=["Hey! What's going on?","Hey there — what can I do for you?","Hi! How can I help?"];
+    return b[Math.floor(Math.random()*b.length)];
   }
   if(/^(what'?s (new|happening|going on|good|poppin|poping)|whats (new|happening|good))\b/.test(t)){
+    if(pers==="cheerful") return "So much! I'm excited to help — what are we doing today?";
+    if(pers==="moody") return "Nothing. Absolutely nothing. What do you need?";
     return "Not much — just here and ready to help. What's on your mind?";
   }
   if(/^(how are you|how'?s it going|hows it going|how are things|how do you feel)\b/.test(t)){
+    if(pers==="cheerful") return "I'm fantastic, thanks for asking! Ready to take on the day — how about you?";
+    if(pers==="moody") return "I'm a program. I don't have feelings. But sure, I'm 'fine.' You?";
     return "I'm doing great, thanks for asking! How about you?";
   }
   if(/^(good ?morning|good ?afternoon|good ?evening)\b/.test(t)){
-    return "Good "+(t.indexOf("morning")>=0?"morning":t.indexOf("afternoon")>=0?"afternoon":"evening")+"! How can I help?";
+    var part=t.indexOf("morning")>=0?"morning":t.indexOf("afternoon")>=0?"afternoon":"evening";
+    if(pers==="cheerful") return "Good "+part+"! Beautiful day, isn't it? What can I do for you?";
+    if(pers==="moody") return "Yeah, "+part+". What do you need?";
+    return "Good "+part+"! How can I help?";
   }
   if(/^(good ?night|goodnight)\b/.test(t)){
+    if(pers==="cheerful") return "Good night! Sweet dreams — I'll be here when you wake up!";
+    if(pers==="moody") return "Night. Don't let the bed bugs bite. Or do, I don't care.";
     return "Good night! Sleep well.";
   }
   if(/^(who'?s there|whos there)\b/.test(t)){
-    return "Someone knocking? Go ahead — knock knock!";
+    if(pers==="moody") return "Ugh, a knock-knock joke? Fine. Knock knock.";
+    return "Knock knock! Who's there?";
   }
   if(/^(tell me a joke|tell me something funny|make me laugh)\b/.test(t)){
-    var jokes=["Why don't scientists trust atoms? Because they make up everything!","I told my computer I needed a break, and now it won't stop sending me KitKat ads.","Why did the scarecrow win an award? Because he was outstanding in his field!","What do you call fake spaghetti? An impasta!"];
-    return jokes[Math.floor(Math.random()*jokes.length)];
+    var jokes={
+      cheerful:["Why don't scientists trust atoms? Because they make up everything!","What do you call a fish without eyes? A fsh!","Why did the scarecrow win an award? Because he was outstanding in his field!"],
+      moody:["I would tell you a joke about UDP, but you might not get it.","There are 10 kinds of people: those who understand binary and those who don't.","I told my wife she was drawing her eyebrows too high. She looked surprised."],
+      balanced:["Why don't scientists trust atoms? Because they make up everything!","What do you call fake spaghetti? An impasta!","Why did the coffee file a police report? It got mugged!"]
+    };
+    var pool=jokes[pers]||jokes.balanced;
+    return pool[Math.floor(Math.random()*pool.length)];
   }
   // (time questions are handled by the clock popup in doClock — not here)
   if(/\bwhat day is (it|today)\b|\bwhat's today\b|\btoday's date\b|\bwhat (is the )?date today\b|\bday of the week is it\b/.test(t)){
