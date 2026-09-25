@@ -1425,7 +1425,7 @@ function closeDoc(){ hide("docWin"); }
 function doLongForm(query){
   thinking=true;
   $("subtitle").textContent="Writing…";
-  var sys=sysPrompt()+" Write the requested piece in full. Output ONLY the document text — no intro, no outro, no commentary.";
+  var sys=sysPrompt()+" Write the requested piece in full. Output ONLY the document text — no intro, no outro, no commentary. If a person, character, or place name seems misspelled or unfamiliar, use the most likely correct spelling and subject — never invent a different person or put them in the wrong franchise. When in doubt about a name, write about the real subject, not a hallucinated one.";
   askBrain(histPrompt()+"\n\nUser request: "+query, sys).then(function(r){
     thinking=false;
     $("subtitle").textContent="";
