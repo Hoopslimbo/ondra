@@ -1414,7 +1414,7 @@ function openPopup(title, html, autoClose){
    Copy and close buttons; that's it for now (notepad comes later). */
 function isLongFormRequest(q){
   var t=String(q||"").toLowerCase();
-  return /\b(write|draft|compose|create|make)\b[\s\S]{0,20}\b(essay|story|stories|poem|report|speech|article|paragraph|letter)\b/.test(t);
+  return /\b(write|draft|compose|create|make)\b[\s\S]{0,20}\b(essay|story|stories|poem|report|speech|article|paragraph)\b/.test(t);
 }
 function openDoc(title, text){
   $("docTitle").textContent=title||"Document";
@@ -1877,7 +1877,7 @@ function sendMessage(text){
   thinking=true;
   closePopup(); // a new question clears any stale popup
   var canned=lockedReply(text);
-  if(canned){ thinking=false; say(canned,"");  return; }
+  if(canned && !isLongFormRequest(text)){ thinking=false; say(canned,"");  return; }
   if(isLongFormRequest(text)){ doLongForm(text); return; } // essays etc: document window on the right
   if(isTimeQ(text)){ doClock(); return; } // mini clock popup, free
   var local=localAnswer(text);
