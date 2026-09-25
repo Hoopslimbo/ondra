@@ -245,9 +245,27 @@
   #codeBtn:active { transform:scale(.95); }
   #codeBtn[data-tip]:hover::before{ left:0; transform:none; }
   /* Code input: mini white rectangle */
-  #codeInput.white-field { background:#fff; color:#111; border:2px solid #fff; border-radius:8px;
-             padding:10px 12px; font-size:16px; font-family:monospace; width:100%; box-sizing:border-box; }
-  #codeInput.white-field:focus { outline:none; border-color:#8ab4ff; }
+  #codeInput.white-field { background:#fff; color:#111; border:2px solid #fff; border-radius:12px;
+             padding:14px 16px; font-size:16px; font-family:ui-monospace,Menlo,monospace; width:100%;
+             box-sizing:border-box; text-align:center; letter-spacing:1px; }
+  #codeInput.white-field:focus { outline:none; border-color:#8ab4ff; box-shadow:0 0 0 3px rgba(138,180,255,.2); }
+  #codeInput.white-field::placeholder { color:#999; letter-spacing:normal; }
+  /* Cleaner code modal */
+  .modal-card.code-card { max-width:380px; padding:32px 28px;
+             background:linear-gradient(160deg, #161c28, #0f141d);
+             border:1px solid rgba(138,180,255,.15); border-radius:24px;
+             box-shadow:0 20px 60px rgba(0,0,0,.5); }
+  .code-card .code-icon { width:56px; height:56px; margin:0 auto 16px; border-radius:50%;
+             background:linear-gradient(145deg, #1e2532, #12161f);
+             border:1px solid rgba(138,180,255,.3); display:flex; align-items:center;
+             justify-content:center; font-family:monospace; font-size:22px; font-weight:bold;
+             color:#8ab4ff; box-shadow:0 4px 16px rgba(0,0,0,.3); }
+  .code-card h2 { font-size:24px; margin-bottom:4px; font-weight:700; }
+  .code-card p.sub { margin-bottom:22px; }
+  .code-card #codeInput { margin-bottom:20px; }
+  .code-actions { display:flex; gap:12px; justify-content:center; }
+  .code-actions .btn { flex:1; margin:0; padding:13px 0; border-radius:12px; font-size:15px; font-weight:600; }
+  .code-card #codeErr { margin-top:14px; min-height:20px; }
   #micBtn .dot { position:absolute; inset:0; margin:auto; width:16px; height:16px; border-radius:50%; background:#8ab4ff; }
   #micBtn.live { border-color:#ff5b5b; box-shadow:0 0 16px #ff5b5b66; }
   #micBtn.live .dot { background:#ff5b5b; animation:blink 1s infinite; }
@@ -625,13 +643,16 @@
 
 <!-- 7. CODE ENTRY (owner access) -->
 <div id="codeModal" class="modal hidden">
-  <div class="modal-card">
-    <h2>Access Code</h2>
+  <div class="modal-card code-card">
+    <div class="code-icon">&lt;/&gt;</div>
+    <h2>Codes</h2>
     <p class="sub">Insert the code.</p>
-    <input id="codeInput" class="white-field" maxlength="64" placeholder="" autocomplete="off" type="password">
-    <button class="btn" id="codeSubmit">Unlock</button>
+    <input id="codeInput" class="white-field" maxlength="64" placeholder="Enter code" autocomplete="off" type="password">
+    <div class="code-actions">
+      <button class="btn" id="codeSubmit">Unlock</button>
+      <button class="btn ghost" id="codeClose">Close</button>
+    </div>
     <div id="codeErr" class="err"></div>
-    <button class="btn ghost" id="codeClose">Close</button>
   </div>
 </div>
 
