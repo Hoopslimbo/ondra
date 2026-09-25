@@ -2287,6 +2287,10 @@ function applyTheme(st){
   var orb=$("orb");
   orb.style.background =
     "radial-gradient(circle at 35% 30%, "+rgba(o.c,0.95)+", "+o.c+" 55%, "+rgba(o.c,0.5)+")";
+  // thin outline so the orb stays visible when wallpaper/orb are the same color:
+  // white on black wallpaper, black on everything else
+  var outlineC=(st.wallpaper==="black")?"rgba(255,255,255,0.55)":"rgba(0,0,0,0.45)";
+  orb.style.border="1.5px solid "+outlineC;
   // the aura is its own selectable glow around the orb
   orb.style.boxShadow="0 0 46px 12px "+rgba(a.c,0.4);
   var gs=$("orbGlowStyle");
