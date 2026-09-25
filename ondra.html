@@ -1432,7 +1432,7 @@ function doLongForm(query){
   // quick Wikipedia research before writing
   function writeIt(research){
     $("subtitle").textContent="Writing…";
-    var sys=sysPrompt()+" You are writing a full-length document. Write the COMPLETE piece — at least 400 words for an essay, multiple paragraphs. Start writing the actual content immediately. NEVER write about the document, NEVER say 'here is' or 'there is an essay', NEVER describe what you're doing — just write the document itself from the first word to the last. Output ONLY the document text.";
+    var sys=sysPrompt()+" You are writing a full-length document. Write the COMPLETE piece — at least 400 words for an essay, multiple paragraphs. Start writing the actual content immediately. NEVER write about the document, NEVER say 'here is' or 'there is an essay', NEVER describe what you're doing — just write the document itself from the first word to the last. CRITICAL: Only write facts you are confident are true. If background research is provided, base your facts on it — do not contradict it. Do NOT invent dates, events, quotes, or details you are unsure about. If you don't know something specific, write around it with general true statements rather than making things up. Output ONLY the document text.";
     var prompt=histPrompt()+"\n\nUser request: "+query;
     if(research) prompt+="\n\nBackground research (use these facts):\n"+research;
     askBrain(prompt, sys).then(function(r){
