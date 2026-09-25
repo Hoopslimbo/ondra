@@ -248,6 +248,13 @@
            white-space:nowrap; opacity:0; pointer-events:none;
            transition:all .2s cubic-bezier(.2,.9,.3,1.2); }
   #menuBar button:hover .tip { opacity:1; transform:translateY(-50%) translateX(0); }
+  /* linked accounts */
+  .link-row { display:flex; align-items:center; justify-content:space-between;
+           padding:14px 16px; border-radius:14px; margin-bottom:10px;
+           background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); }
+  .link-info { text-align:left; }
+  .link-name { color:#eef1f6; font-size:15px; font-weight:600; }
+  .link-desc { color:#8a93a6; font-size:13px; margin-top:2px; }
   #addonBtn { margin-left:8px; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:20px;
               background:#141a26; border:2px solid #2a3140; transition:all .2s ease; line-height:1;
               display:inline-flex; align-items:center; justify-content:center; vertical-align:middle; }
@@ -831,6 +838,23 @@
     <p class="sub">Extra power for your AI.</p>
     <div id="addonList"></div>
     <button class="btn ghost" id="addonClose">Close</button>
+  </div>
+</div>
+<!-- LINKED ACCOUNTS -->
+<div id="linksModal" class="modal hidden">
+  <div class="modal-card">
+    <h2>Linked Accounts</h2>
+    <p class="sub">Connect your accounts so I can act on them.</p>
+    <div id="linksList">
+      <div class="link-row">
+        <div class="link-info">
+          <div class="link-name">Gmail</div>
+          <div class="link-desc">Send emails for you</div>
+        </div>
+        <button class="btn" id="linkGmail">Connect</button>
+      </div>
+    </div>
+    <button class="btn ghost" id="linksClose">Close</button>
   </div>
 </div>
 
@@ -1779,7 +1803,12 @@ $("menuNotes").onclick=function(){
 };
 $("menuLinks").onclick=function(){
   closeMenu();
-  say("Linked accounts are coming soon — you'll be able to connect Gmail and more.");
+  show("linksModal");
+};
+$("linksClose").onclick=function(){ hide("linksModal"); };
+$("linksModal").onclick=function(e){ if(e.target===$("linksModal")) hide("linksModal"); };
+$("linkGmail").onclick=function(){
+  say("Gmail linking is coming soon — for now I can draft emails and open your mail app to send them.");
 };
 $("notepadClose").onclick=function(){ hide("notepadModal"); };
 $("notepadModal").onclick=function(e){ if(e.target===$("notepadModal")) hide("notepadModal"); };
