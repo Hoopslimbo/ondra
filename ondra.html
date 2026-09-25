@@ -1258,13 +1258,15 @@ function startListening(quiet){
 function toggleMic(){ if(micOn) stopMic(); else startListening(false); }
 function stopMic(){ micOn=false; try{ if(recog) recog.stop(); }catch(e){} $("micBtn").classList.remove("live"); }
 function ackWake(){
-  // Bare name with no command: play the chosen wake ding (chime only, like
-  // LUNA), then a short follow-up window where the wake word isn't needed —
+  // Bare name with no command: close any open windows first, then play
+  // the chosen wake ding (chime only, like LUNA), then a short follow-up
+  // window where the wake word isn't needed —
   // 8 seconds: the ding + the user's reaction + their question + Chrome's
   // final-transcript latency never fit in the old 2s window, so answers
   // spoken after the ding were silently ignored.
   // Mic stays on; anything heard while the AI itself is speaking is ignored
   // so it can't trigger on its own voice — except its name, which stops it.
+  closeDoc(); closePopup(); // saying its name dismisses open windows
   pulseOrb();
   var orb=$("orb");
   orb.classList.add("talking");
