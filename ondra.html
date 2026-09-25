@@ -908,7 +908,7 @@ var NET_TL = "en-US";
    female voice; if that ever recurs, this is the spot to check.) */
 var VOICES = {
   female:{ name:"US English Female", tl:"en-US", pitch:"0.5", rate:"0.55", devPitch:1.25 },
-  male:{ name:"US English Male", tl:"en-US", pitch:"0.15", rate:"0.55", devPitch:0.55 }
+  male:{ name:"US English Male", tl:"en-US", pitch:"0.15", rate:"0.55", devPitch:0.85 }
 };
 function vcfg(v){ return VOICES[v]||VOICES[S.voice]||VOICES.female; }
 function voiceName(v){ return vcfg(v).name; }
@@ -1021,6 +1021,14 @@ function speak(text, onStart, onDone, voice, prosody){
   netSpeak(text, my, fireStart, fireDone, voice, prosody);
 }
 function netSpeak(text, my, onStart, onDone, voice, prosody){
+  // Male voice uses the browser's native voices (deeper options like
+  // Microsoft David/Mark) instead of ResponsiveVoice's limited library.
+  // Female stays on ResponsiveVoice.
+  var vkey=voice||S.voice;
+  if(vkey==="male"){
+    deviceSpeak(text,onStart,onDone,voice,prosody);
+    return;
+  }
   var cfg = Object.assign({}, vcfg(voice));
   if(prosody){ // mood multipliers (e.g. cheery = higher/faster) on top of the chosen voice
     if(prosody.pitch) cfg.pitch=(parseFloat(cfg.pitch)*prosody.pitch).toFixed(2);
