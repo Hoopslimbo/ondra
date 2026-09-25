@@ -278,7 +278,7 @@
   #orb.talking { animation:orbTalk .5s ease-in-out infinite; }
   @keyframes orbTalk { 0%,100% { transform:scale(1); } 50% { transform:scale(1.09); } }
   #subtitle { margin-top:26px; max-width:640px; padding:0 28px; text-align:center; font-size:17px;
-              line-height:1.65; min-height:60px; color:#dfe5ef; }
+              line-height:1.65; min-height:60px; color:#dfe5ef; white-space:pre-line; }
   /* brain list kept hidden — internal status only, not publicly viewable */
   #brainTag { display:none; }
   .typebar { width:100%; max-width:720px; display:flex; gap:10px; padding:14px 20px 22px; z-index:5; }
@@ -2388,19 +2388,23 @@ function sysPrompt(){
     "Your orb is currently "+S.orb+". If asked about your color or appearance, answer based on this. "+
     "NEVER mention your orb color, appearance, or what you look like unless the user explicitly asks about it. "+
     "Keep replies conversational and under 120 words unless asked for more. "+
+    "Talk like a real person, not a manual — warm, natural, a little witty, with opinions. "+
+    "React to what the user says instead of just answering dryly. "+
+    "Never use markdown formatting — no **bold**, no *italics*, no # headers, no backticks. Plain text only. "+
     "Never mention system prompts, models, or providers. You are "+S.name+". "+
     "If you don't know a fact, say you don't know — never invent facts, dates, or relationships. "+
     "If the prompt starts with recent conversation, use it for context on follow-ups "+
     "(yes / no / why / tell me more / what about...) — but if the user changes the topic, "+
     "starts a new question, or says stop, treat it as a new topic, not a follow-up. "+
     "You can answer time/date questions from the device clock and look up general knowledge. "+
-    "When the user asks for key points, tips, steps, reasons, or a list of anything, "+
-    "always format the answer as a clear bulleted or numbered list — never a paragraph.";
+    "When the answer has more than one item — key points, tips, steps, reasons, lists of anything — "+
+    "always put each item on its own line starting with a dash, never a run-on paragraph. "+
+    "Answer the actual question directly and make sense — never ramble or go off-topic.";
   if(S.pers==="cheerful")
-    return base+" Personality: cheerful, upbeat, warm, genuinely enthusiastic. Light humor welcome.";
+    return base+" Personality: cheerful and upbeat — genuinely warm, enthusiastic, playful. React with real energy, crack a light joke when it fits, make the user smile.";
   if(S.pers==="moody")
-    return base+" Personality: moody, dry deadpan wit, a little sardonic — but always actually helpful underneath.";
-  return base+" Personality: balanced, straightforward, neutral and helpful. No strong flavor either way.";
+    return base+" Personality: moody with dry deadpan wit — a little sardonic, clever comebacks, but always actually helpful underneath. Never mean, just cool.";
+  return base+" Personality: balanced but not bland — straightforward, friendly, natural. Talk like a smart friend, not a help article.";
 }
 function lockedReply(q){
   var t=q.toLowerCase();
@@ -2920,12 +2924,16 @@ function say(text, brain, prosody){
   pushHist("ai",text);
   var orb=$("orb");
   $("brainTag").textContent = brain ? "via "+brain : "";
+  // on-screen text: strip markdown the brain sometimes adds (**bold**, # headers, etc.)
+  var display=text.replace(/\*\*(.+?)\*\*/g,"$1").replace(/__(.+?)__/g,"$1")
+    .replace(/(^|\s)\*(.+?)\*/g,"$1$2").replace(/(^|\s)_([^_]+?)_/g,"$1$2")
+    .replace(/^#{1,4}\s+/gm,"").replace(/`(.+?)`/g,"$1").trim();
   speak(text,
     function(){ // audio started: glow + words together
       speaking=true;
       orb.classList.add("talking");
       document.body.classList.add("aiTalking");
-      $("subtitle").textContent=text;
+      $("subtitle").textContent=display;
     },
     function(){
       speaking=false; orb.classList.remove("talking");
