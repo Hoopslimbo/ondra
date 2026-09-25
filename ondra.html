@@ -210,25 +210,24 @@
   #menuBtn:hover { border-color:#8ab4ff; transform:scale(1.08); }
   #menuBtn svg { transition:transform .25s ease; }
   #menuBtn.open svg { transform:rotate(180deg); }
-  #menuBar { position:fixed; top:70px; right:18px; z-index:95; display:flex; flex-direction:column; gap:8px;
-           padding:12px; border-radius:20px; min-width:180px;
-           background:
-             linear-gradient(160deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.03) 28%, rgba(255,255,255,0) 55%),
-             rgba(16,20,29,.7);
-           -webkit-backdrop-filter:blur(24px) saturate(1.7);
-           backdrop-filter:blur(24px) saturate(1.7);
-           border:1px solid rgba(255,255,255,.2);
-           box-shadow:0 16px 56px rgba(0,0,0,.5),
-                      inset 0 1px 1px rgba(255,255,255,.35);
-           transform-origin:top center;
-           animation:menuDrop .28s ease; }
+  #menuBar { position:fixed; top:72px; right:16px; z-index:95; display:flex; flex-direction:column; gap:4px;
+           padding:8px; border-radius:18px; min-width:200px;
+           background:rgba(18,22,32,.72);
+           -webkit-backdrop-filter:blur(28px) saturate(1.8);
+           backdrop-filter:blur(28px) saturate(1.8);
+           border:1px solid rgba(255,255,255,.1);
+           box-shadow:0 20px 60px rgba(0,0,0,.55),
+                      inset 0 1px 0 rgba(255,255,255,.12);
+           transform-origin:top right;
+           animation:menuDrop .3s cubic-bezier(.2,.9,.3,1.2); }
   #menuBar.hidden { display:none; }
-  @keyframes menuDrop { from { opacity:0; transform:scaleY(.6) translateY(-12px); } to { opacity:1; transform:scaleY(1) translateY(0); } }
-  #menuBar button { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:14px;
-           border:1px solid rgba(255,255,255,.12);
-           background:linear-gradient(160deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.02) 100%);
-           color:#eef1f6; font-size:14px; font-weight:500; cursor:pointer; transition:all .2s ease; text-align:left; }
-  #menuBar button:hover { border-color:#8ab4ff; transform:translateX(-2px); }
+  @keyframes menuDrop { from { opacity:0; transform:scale(.92) translateY(-10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+  #menuBar button { display:flex; align-items:center; gap:14px; padding:11px 14px; border-radius:12px;
+           border:none; background:transparent;
+           color:#eef1f6; font-size:14px; font-weight:500; cursor:pointer; transition:all .15s ease; text-align:left; }
+  #menuBar button:hover { background:rgba(255,255,255,.08); }
+  #menuBar button:active { transform:scale(.98); }
+  #menuBar button svg { opacity:.85; flex-shrink:0; }
   #addonBtn { margin-left:8px; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:20px;
               background:#141a26; border:2px solid #2a3140; transition:all .2s ease; line-height:1;
               display:inline-flex; align-items:center; justify-content:center; vertical-align:middle; }
