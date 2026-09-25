@@ -1516,10 +1516,29 @@ function doSay(sq){
    can't answer falls back to the brain chain. */
 function localAnswer(q){
   var t=String(q||"").toLowerCase().trim();
-  // greetings — never Wikipedia these
-  if(/^(what'?s up|whats up|what up|sup|hey|hi|hello|yo)\b/.test(t)){
+  // greetings & small talk — never Wikipedia these
+  if(/^(what'?s up|whats up|what up|sup|hey|hi|hello|yo|hiya|howdy)\b/.test(t)){
     var greetings=["Hey! What's going on?","Hey there!","Hi! How can I help?","Hey! Good to see you."];
     return greetings[Math.floor(Math.random()*greetings.length)];
+  }
+  if(/^(what'?s (new|happening|going on|good|poppin|poping)|whats (new|happening|good))\b/.test(t)){
+    return "Not much — just here and ready to help. What's on your mind?";
+  }
+  if(/^(how are you|how'?s it going|hows it going|how are things|how do you feel)\b/.test(t)){
+    return "I'm doing great, thanks for asking! How about you?";
+  }
+  if(/^(good ?morning|good ?afternoon|good ?evening)\b/.test(t)){
+    return "Good "+(t.indexOf("morning")>=0?"morning":t.indexOf("afternoon")>=0?"afternoon":"evening")+"! How can I help?";
+  }
+  if(/^(good ?night|goodnight)\b/.test(t)){
+    return "Good night! Sleep well.";
+  }
+  if(/^(who'?s there|whos there)\b/.test(t)){
+    return "Someone knocking? Go ahead — knock knock!";
+  }
+  if(/^(tell me a joke|tell me something funny|make me laugh)\b/.test(t)){
+    var jokes=["Why don't scientists trust atoms? Because they make up everything!","I told my computer I needed a break, and now it won't stop sending me KitKat ads.","Why did the scarecrow win an award? Because he was outstanding in his field!","What do you call fake spaghetti? An impasta!"];
+    return jokes[Math.floor(Math.random()*jokes.length)];
   }
   // (time questions are handled by the clock popup in doClock — not here)
   if(/\bwhat day is (it|today)\b|\bwhat's today\b|\btoday's date\b|\bwhat (is the )?date today\b|\bday of the week is it\b/.test(t)){
@@ -1534,7 +1553,8 @@ function lookupQuery(q){
     var topic=m[1].trim();
     if(!topic) return null;
     if(/^(you|your|yourself)\b/i.test(topic)) return null; // self questions stay with the brain
-    if(/^(up|down|it|this|that|there|here)$/i.test(topic)) return null; // greetings like "what's up" stay with the brain
+    if(/^(up|down|it|this|that|there|here|new|happening|good|going on)$/i.test(topic)) return null; // greetings like "what's up" stay with the brain
+    if(/^(a joke|something funny)$/i.test(topic)) return null; // "tell me a joke" is handled locally
     if(/\d/.test(topic) && /[+\-*/%^]|percent|\bof\b/.test(topic)) return null; // math stays with the brain
     return {q:topic, dict:false};
   }
