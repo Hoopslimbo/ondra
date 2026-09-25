@@ -667,6 +667,8 @@
 
 <!-- Code button: fixed top-left, visible on every screen -->
 <button id="codeBtn" data-tip="Codes" aria-label="Codes">&lt;/&gt;</button>
+<!-- Admin button: only visible for owners -->
+<button id="adminBtn" data-tip="Admin" aria-label="Admin" class="hidden">⚙</button>
 
 <script>
 (function(){
@@ -723,7 +725,7 @@ hide("gate-device");
 function lsGet(k){ try{ var v=localStorage.getItem(k); return v===null?null:v; }catch(e){ return null; } }
 function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
 /* Owner access code: SHA-256 hash of the code. Set via codeHash() below. */
-var OWNER_CODE_HASH = "d4ebfe143d91949ed64cae75b1324699fbb5a3c9dcef26976129a5174e8b1f36";
+var OWNER_CODE_HASH = "f69ddcc92c44eb5a6320e241183ef551d9287d7fa6e4b2c77459145d8dd0bb37";
 /* Maintenance mode: when true, everyone sees the maintenance screen
    unless they've unlocked with the owner code. */
 var MAINTENANCE = true;
