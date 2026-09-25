@@ -1162,7 +1162,7 @@ function appendRainbowSwatch(box, isSel, onPick){
 }
 /* ---- customizable browser tab icon ---- */
 var TAB_ICONS = [
-  {n:"o", label:"Ondra O", path:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 1.6a8.4 8.4 0 1 1 0 16.8 8.4 8.4 0 0 1 0-16.8z", rule:"evenodd"},
+  {n:"o", label:"Ondra O", path:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"},
   {n:"sparkle", label:"Sparkle", path:"M12 2c.8 5.4 2.6 7.2 8 8-5.4.8-7.2 2.6-8 8-.8-5.4-2.6-7.2-8-8 5.4-.8 7.2-2.6 8-8z"},
   {n:"bolt", label:"Bolt", path:"M13 2L4.5 13.5H11L9.5 22 19 10h-6.5L13 2z"},
   {n:"heart", label:"Heart", path:"M12 21C6 16.5 2.5 13 2.5 9.3 2.5 6.4 4.8 4 7.7 4c1.7 0 3.3.9 4.3 2.4C13 4.9 14.6 4 16.3 4c2.9 0 5.2 2.4 5.2 5.3 0 3.7-3.5 7.2-9.5 11.7z"},
@@ -1194,9 +1194,9 @@ function tabIconSVG(iconName, outlineName, fgName, size){
     if(n==="clear") return "none";
     return rainColor(n, RAINBOW[8]).c;
   }
-  // the Ondra O is a thin ring — it gets a hairline edge so the band stays thin,
-  // and it's drawn bigger so it fills the tab
-  var sw = (iconName==="o") ? 0.9 : 2.4;
+  // the Ondra O is a plain circle — its rainbow outline is the design, so it gets
+  // a logo-proportioned stroke and is drawn bigger to fill the tab
+  var sw = (iconName==="o") ? 1.8 : 2.4;
   var tf = (iconName==="o") ? "translate(3,3) scale(2.4167)" : "translate(6,6) scale(2.1667)";
   // transparent background — the icon itself carries the outline; drawn large
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="'+size+'" height="'+size+'">'
@@ -1222,7 +1222,7 @@ function makeFavicon(iconName, outlineName, fgName){
   img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
 }
 function applyTabIcon(){
-  makeFavicon(S.tabIcon||"o", S.tabOutline||S.tabBg||"rainbow", S.tabColor||"rainbow");
+  makeFavicon(S.tabIcon||"o", S.tabOutline||S.tabBg||"rainbow", S.tabColor||"clear");
 }
 /* shared tab-icon stepper: < > arrows cycle Outline -> Icon -> Icon color,
    big live preview always at the bottom. p = element id prefix, state = obj
@@ -1232,7 +1232,7 @@ function initTabIconStepper(p, state){
   var names=["Outline","Icon","Icon color"];
   function preview(){
     var pv=$(p+"Preview");
-    pv.innerHTML=tabIconSVG(state.tabIcon||"o", state.tabOutline||state.tabBg||"rainbow", state.tabColor||"rainbow", 60);
+    pv.innerHTML=tabIconSVG(state.tabIcon||"o", state.tabOutline||state.tabBg||"rainbow", state.tabColor||"clear", 60);
   }
   function render(){
     $(p+"Name").textContent=names[stepIdx];
@@ -1287,7 +1287,7 @@ function initTabIconStepper(p, state){
   return { refresh:render };
 }
 var wiz = { step:1, name:"", voice:"female", pers:"balanced", wallpaper:"blue", orb:"pink", aura:"blue", ding:"classic",
-            tabIcon:"o", tabOutline:"rainbow", tabColor:"rainbow" };
+            tabIcon:"o", tabOutline:"rainbow", tabColor:"clear" };
 var wizStarted = false;
 
 function startWizard(){
@@ -2347,7 +2347,7 @@ $("setVoice").onclick=function(){
 };
 $("menuCustom").onclick=function(){
   closeMenu();
-  themeTmp={wallpaper:S.wallpaper, orb:S.orb, aura:S.aura, tabIcon:S.tabIcon||"o", tabOutline:S.tabOutline||S.tabBg||"rainbow", tabColor:S.tabColor||"rainbow"};
+  themeTmp={wallpaper:S.wallpaper, orb:S.orb, aura:S.aura, tabIcon:S.tabIcon||"o", tabOutline:S.tabOutline||S.tabBg||"rainbow", tabColor:S.tabColor||"clear"};
   $("setName").value=S.name; $("setName").style.borderColor="";
   buildThemeSwatches();
   themeTab("A");
@@ -2459,7 +2459,7 @@ function popDragEnd(){ popDrag=null; document.body.classList.remove("popDragging
 })();
 
 /* ================= CHAT ================= */
-var S = { name:"Ondra", wake:"hey", voice:"female", pers:"balanced", wallpaper:"blue", orb:"pink", aura:"blue", voiceMuted:false, tabIcon:"o", tabOutline:"rainbow", tabColor:"rainbow" };
+var S = { name:"Ondra", wake:"hey", voice:"female", pers:"balanced", wallpaper:"blue", orb:"pink", aura:"blue", voiceMuted:false, tabIcon:"o", tabOutline:"rainbow", tabColor:"clear" };
 var thinking=false;
 
 /* ================= CONVERSATION MEMORY =================
@@ -3136,7 +3136,7 @@ function buildThemeSwatches(){
   row("setWall","wallpaper"); row("setOrb","orb"); row("setAura","aura");
 }
 var gb=$("gearBtn"); if(gb) gb.onclick=function(){
-  themeTmp={wallpaper:S.wallpaper, orb:S.orb, aura:S.aura, tabIcon:S.tabIcon||"o", tabOutline:S.tabOutline||S.tabBg||"rainbow", tabColor:S.tabColor||"rainbow"};
+  themeTmp={wallpaper:S.wallpaper, orb:S.orb, aura:S.aura, tabIcon:S.tabIcon||"o", tabOutline:S.tabOutline||S.tabBg||"rainbow", tabColor:S.tabColor||"clear"};
   $("setName").value=S.name; $("setName").style.borderColor="";
   buildThemeSwatches();
   show("themeModal");
