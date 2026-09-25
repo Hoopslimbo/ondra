@@ -870,12 +870,13 @@ function goStep(n){
 var NET_TL = "en-US";
 /* Distinct natural internet voices per choice — different voice, pitch and
    rate for male vs female so the two options never sound the same.
-   Male: US English Male with en-US, pitched down deep (0.15 ≈ 98 Hz).
+   Male: US English Male with en-US, pitched to a deep natural range
+   (0.35 — extreme pitch shifts like 0.15 cause robotic distortion).
    (The old en-US pairing made the endpoint fall back to the default
    female voice; if that ever recurs, this is the spot to check.) */
 var VOICES = {
   female:{ name:"US English Female", tl:"en-US", pitch:"0.5", rate:"0.55", devPitch:1.25 },
-  male:{ name:"US English Male", tl:"en-US", pitch:"0.15", rate:"0.5", devPitch:0.5 }
+  male:{ name:"US English Male", tl:"en-US", pitch:"0.35", rate:"0.9", devPitch:0.7 }
 };
 function vcfg(v){ return VOICES[v]||VOICES[S.voice]||VOICES.female; }
 function voiceName(v){ return vcfg(v).name; }
