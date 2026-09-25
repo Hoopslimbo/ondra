@@ -393,6 +393,11 @@
   #docWin.hidden { display:none; }
   .doc-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
   #docTitle { font-size:17px; font-weight:600; color:#eef1f6; }
+  #docTitleInput { font-size:17px; font-weight:600; color:#eef1f6; background:rgba(255,255,255,.06);
+                   border:1px solid rgba(255,255,255,.2); border-radius:10px; padding:6px 12px;
+                   width:220px; max-width:60vw; outline:none; }
+  #docTitleInput:focus { border-color:#8ab4ff; }
+  #docTitleInput::placeholder { color:#8a93a6; font-weight:400; }
   .doc-actions { display:flex; gap:8px; }
   .doc-actions button { width:32px; height:32px; border-radius:50%; border:1px solid rgba(255,255,255,.2);
            background:rgba(255,255,255,.06); color:#dfe5ef; font-size:15px; cursor:pointer; }
@@ -425,13 +430,17 @@
            box-shadow:0 16px 56px rgba(0,0,0,.5),
                       inset 0 1px 1px rgba(255,255,255,.35),
                       inset 0 -1px 1px rgba(255,255,255,.08);
-           padding:20px 22px 24px; animation:popIn .32s ease; }
+           padding:20px 22px 24px; animation:noteGlide .45s cubic-bezier(.2,.9,.25,1); }
+  @keyframes noteGlide { from { opacity:0; transform:translate(calc(-50% + 160px),-50%); }
+                         to { opacity:1; transform:translate(-50%,-50%); } }
   #notepadModal.hidden { display:none; }
   #notepadModal .popup-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
   #notepadModal .popup-head span { font-size:17px; font-weight:600; color:#eef1f6; }
   #notepadModal .popup-head button { width:32px; height:32px; border-radius:50%; border:1px solid rgba(255,255,255,.2);
            background:rgba(255,255,255,.06); color:#dfe5ef; font-size:14px; cursor:pointer; }
   #notepadModal .popup-head button:hover { border-color:#8ab4ff; color:#8ab4ff; }
+  #notepadModal .popup-head div { display:flex; gap:8px; }
+  #noteAdd { font-size:20px !important; line-height:1; }
   #notepadList { overflow-y:auto; display:flex; flex-direction:column; gap:10px; margin-top:12px; padding-right:4px; }
   .note-item { padding:14px 16px; border-radius:16px;
            background:linear-gradient(160deg, rgba(255,255,255,.1) 0%, rgba(255,255,255,.03) 100%);
@@ -592,6 +601,37 @@
   .trow { margin-bottom:16px; }
   .tlabel { font-size:13px; letter-spacing:2px; text-transform:uppercase; color:#8ab4ff; margin-bottom:10px; }
   .swatches.sm .sw { width:42px; height:42px; }
+  .tabicon-prev { width:52px; height:52px; border-radius:13px; margin:0 auto;
+                  border:1px solid rgba(255,255,255,.16); display:flex; align-items:center; justify-content:center; }
+  .tabicon-prev svg { width:34px; height:34px; }
+  .icon-grid { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+  .icon-grid .ic { width:44px; height:44px; border-radius:12px; cursor:pointer;
+                   border:2px solid rgba(255,255,255,.12); background:rgba(255,255,255,.05);
+                   display:flex; align-items:center; justify-content:center; transition:all .15s ease; }
+  .icon-grid .ic svg { width:24px; height:24px; }
+  .icon-grid .ic:hover { border-color:#8ab4ff; transform:scale(1.08); }
+  .icon-grid .ic.sel { border-color:#8ab4ff; box-shadow:0 0 12px rgba(138,180,255,.4); }
+  /* tab icon stepper (< > navigation + big preview + save) */
+  .tistep-nav { display:flex; align-items:center; justify-content:center; gap:18px; margin-bottom:16px; }
+  .tistep-arrow { width:40px; height:40px; border-radius:50%; border:1px solid rgba(255,255,255,.2);
+                  background:rgba(255,255,255,.06); color:#eef1f6; font-size:18px; cursor:pointer;
+                  display:flex; align-items:center; justify-content:center; transition:all .15s ease; }
+  .tistep-arrow:hover { border-color:#8ab4ff; color:#8ab4ff; transform:scale(1.1); }
+  .tistep-name { font-size:15px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:#8ab4ff;
+                 min-width:140px; text-align:center; }
+  .tistep-body { min-height:120px; margin-bottom:18px; }
+  .tistep-preview { display:flex; flex-direction:column; align-items:center; gap:10px; margin:6px 0 18px; }
+  .tistep-prevbig { width:88px; height:88px; border-radius:22px; display:flex; align-items:center; justify-content:center;
+                    border:1px solid rgba(255,255,255,.2); box-shadow:0 8px 28px rgba(0,0,0,.4); }
+  .tistep-prevbig svg { width:60px; height:60px; }
+  .tistep-prevlabel { font-size:12px; letter-spacing:2px; text-transform:uppercase; color:#8a93a6; }
+  /* customization modal tabs */
+  .theme-tabs { display:flex; gap:8px; justify-content:center; margin-bottom:20px; }
+  .theme-tab { padding:8px 20px; border-radius:20px; border:1px solid rgba(255,255,255,.14);
+               background:rgba(255,255,255,.05); color:#9aa3b2; font-size:14px; font-weight:600;
+               cursor:pointer; transition:all .15s ease; }
+  .theme-tab.sel { background:rgba(138,180,255,.18); border-color:#8ab4ff; color:#eef1f6; }
+  .theme-tabpane.hidden { display:none; }
   .modal-nav { display:flex; gap:10px; margin-top:6px; }
   .modal-nav .btn { margin:0; }
   .addon-card { background:#0d1119; border:2px solid #2a3140; border-radius:16px; padding:18px; margin-bottom:14px;
@@ -719,6 +759,21 @@
       <div class="swatches" id="auraSwatches"></div>
     </div>
 
+    <div class="step" data-step="7">
+      <h2>Tab icon</h2>
+      <p class="hint">Your AI's browser tab icon — make it yours. Use ‹ › to switch between background, icon, and color.</p>
+      <div class="tistep-nav">
+        <button class="tistep-arrow" id="wTiPrev" aria-label="previous">‹</button>
+        <span class="tistep-name" id="wTiName">Background</span>
+        <button class="tistep-arrow" id="wTiNext" aria-label="next">›</button>
+      </div>
+      <div class="tistep-body" id="wTiBody"></div>
+      <div class="tistep-preview">
+        <div class="tistep-prevbig" id="wTiPreview"></div>
+        <div class="tistep-prevlabel">Your tab icon</div>
+      </div>
+    </div>
+
     <div class="wiz-nav">
       <button class="btn ghost" id="wizBack">Back</button>
       <button class="btn" id="wizNext">Next</button>
@@ -769,7 +824,7 @@
   <button id="menuBtn" data-tip="Menu" aria-label="Menu"><svg viewBox="0 0 24 24" width="24" height="24" fill="#fff" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg></button>
   <!-- 4d. NOTEPAD (saved documents) -->
   <div id="notepadModal" class="hidden">
-    <div class="popup-head"><span class="tip">Notepad</span><button id="notepadClose" data-tip="Close" aria-label="close">✕</button></div>
+    <div class="popup-head"><span class="tip">Notepad</span><div><button id="noteAdd" data-tip="New note" aria-label="new note">+</button><button id="notepadClose" data-tip="Close" aria-label="close">✕</button></div></div>
     <div id="notepadList"></div>
   </div>
   <!-- 4e. EMAIL COMPOSER -->
@@ -817,13 +872,34 @@
   <div class="modal-card">
     <h2>Customization</h2>
     <p class="sub">Change your AI's name and look any time.</p>
-    <div class="trow"><div class="tlabel">AI name</div><input id="setName" maxlength="24" autocomplete="off"></div>
-    <div class="trow"><div class="tlabel">Wallpaper</div><div class="swatches sm" id="setWall"></div></div>
-    <div class="trow"><div class="tlabel">Orb</div><div class="swatches sm" id="setOrb"></div></div>
-    <div class="trow"><div class="tlabel">Aura</div><div class="swatches sm" id="setAura"></div></div>
-    <div class="modal-nav">
-      <button class="btn ghost" id="themeCancel">Cancel</button>
-      <button class="btn" id="themeSave">Save theme</button>
+    <div class="theme-tabs">
+      <button class="theme-tab sel" id="themeTabBtnA">Appearance</button>
+      <button class="theme-tab" id="themeTabBtnI">Tab Icon</button>
+    </div>
+    <div class="theme-tabpane" id="themeTabA">
+      <div class="trow"><div class="tlabel">AI name</div><input id="setName" maxlength="24" autocomplete="off"></div>
+      <div class="trow"><div class="tlabel">Wallpaper</div><div class="swatches sm" id="setWall"></div></div>
+      <div class="trow"><div class="tlabel">Orb</div><div class="swatches sm" id="setOrb"></div></div>
+      <div class="trow"><div class="tlabel">Aura</div><div class="swatches sm" id="setAura"></div></div>
+      <div class="modal-nav">
+        <button class="btn ghost" id="themeCancel">Cancel</button>
+        <button class="btn" id="themeSave">Save theme</button>
+      </div>
+    </div>
+    <div class="theme-tabpane hidden" id="themeTabI">
+      <div class="tistep-nav">
+        <button class="tistep-arrow" id="mTiPrev" aria-label="previous">‹</button>
+        <span class="tistep-name" id="mTiName">Background</span>
+        <button class="tistep-arrow" id="mTiNext" aria-label="next">›</button>
+      </div>
+      <div class="tistep-body" id="mTiBody"></div>
+      <div class="tistep-preview">
+        <div class="tistep-prevbig" id="mTiPreview"></div>
+        <div class="tistep-prevlabel">Your tab icon</div>
+      </div>
+      <div class="modal-nav" style="justify-content:center">
+        <button class="btn" id="tabIconSave">Save tab icon</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1017,7 +1093,104 @@ var RAINBOW = [
   {n:"pink",c:"#ff375f"},
   {n:"black",c:"#111111"},{n:"white",c:"#ffffff"},{n:"gray",c:"#6e747c"}
 ];
-var wiz = { step:1, name:"", voice:"female", pers:"balanced", wallpaper:"blue", orb:"pink", aura:"blue", ding:"classic" };
+/* ---- customizable browser tab icon ---- */
+var TAB_ICONS = [
+  {n:"o", label:"O", path:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 5a5 5 0 1 1 0 10 5 5 0 0 1 0-10z", rule:"evenodd"},
+  {n:"sparkle", label:"Sparkle", path:"M12 2c.8 5.4 2.6 7.2 8 8-5.4.8-7.2 2.6-8 8-.8-5.4-2.6-7.2-8-8 5.4-.8 7.2-2.6 8-8z"},
+  {n:"bolt", label:"Bolt", path:"M13 2L4.5 13.5H11L9.5 22 19 10h-6.5L13 2z"},
+  {n:"heart", label:"Heart", path:"M12 21C6 16.5 2.5 13 2.5 9.3 2.5 6.4 4.8 4 7.7 4c1.7 0 3.3.9 4.3 2.4C13 4.9 14.6 4 16.3 4c2.9 0 5.2 2.4 5.2 5.3 0 3.7-3.5 7.2-9.5 11.7z"},
+  {n:"chat", label:"Chat", path:"M3 4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-6 5V4z"},
+  {n:"star", label:"Star", path:"M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8L12 2z"},
+  {n:"moon", label:"Moon", path:"M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"},
+  {n:"orb", label:"Orb", path:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"}
+];
+function tabIconSVG(iconName, bgColor, fgColor, size){
+  var ic = TAB_ICONS.filter(function(t){ return t.n===iconName; })[0] || TAB_ICONS[0];
+  var rule = ic.rule ? ' fill-rule="'+ic.rule+'"' : '';
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="'+size+'" height="'+size+'">'
+    + '<rect width="64" height="64" rx="14" fill="'+bgColor+'"/>'
+    + '<g transform="translate(14,14) scale(1.5)" fill="'+fgColor+'">'
+    + '<path d="'+ic.path+'"'+rule+'/></g></svg>';
+}
+function setFavicon(url){
+  var l = document.querySelector('link[rel="icon"]');
+  if(!l){ l = document.createElement('link'); l.rel = 'icon'; document.head.appendChild(l); }
+  l.type = 'image/png'; l.href = url;
+}
+function makeFavicon(iconName, bgName, fgName){
+  var bg = rainColor(bgName, RAINBOW[4]).c, fg = rainColor(fgName, RAINBOW[8]).c;
+  var svg = tabIconSVG(iconName, bg, fg, 64);
+  var img = new Image();
+  img.onload = function(){
+    try{
+      var c = document.createElement('canvas'); c.width = 64; c.height = 64;
+      c.getContext('2d').drawImage(img, 0, 0, 64, 64);
+      setFavicon(c.toDataURL('image/png'));
+    }catch(e){}
+  };
+  img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+}
+function applyTabIcon(){
+  makeFavicon(S.tabIcon||"o", S.tabBg||"blue", S.tabColor||"white");
+}
+/* shared tab-icon stepper: < > arrows cycle Background -> Icon -> Icon color,
+   big live preview always at the bottom. p = element id prefix, state = obj
+   holding tabIcon/tabBg/tabColor */
+function initTabIconStepper(p, state){
+  var stepIdx=0;
+  var names=["Background","Icon","Icon color"];
+  function preview(){
+    var bg=rainColor(state.tabBg||"blue",RAINBOW[4]).c;
+    var fg=rainColor(state.tabColor||"white",RAINBOW[8]).c;
+    var pv=$(p+"Preview");
+    pv.innerHTML=tabIconSVG(state.tabIcon||"o",bg,fg,60);
+    pv.style.background=bg;
+  }
+  function render(){
+    $(p+"Name").textContent=names[stepIdx];
+    var body=$(p+"Body"); body.innerHTML="";
+    if(stepIdx===1){
+      var grid=document.createElement("div"); grid.className="icon-grid";
+      TAB_ICONS.forEach(function(ic){
+        var d=document.createElement("div");
+        d.className="ic"+(state.tabIcon===ic.n?" sel":"");
+        d.title=ic.label;
+        d.innerHTML='<svg viewBox="0 0 24 24" fill="#fff"><path d="'+ic.path+'"'+(ic.rule?' fill-rule="'+ic.rule+'"':'')+'/></svg>';
+        d.onclick=function(){
+          state.tabIcon=ic.n;
+          var kids=grid.children;
+          for(var k=0;k<kids.length;k++) kids[k].classList.remove("sel");
+          d.classList.add("sel"); preview();
+        };
+        grid.appendChild(d);
+      });
+      body.appendChild(grid);
+    }else{
+      var key=stepIdx===0?"tabBg":"tabColor";
+      var box=document.createElement("div"); box.className="swatches sm";
+      RAINBOW.forEach(function(r){
+        var d=document.createElement("div");
+        d.className="sw"+(state[key]===r.n?" sel":"");
+        d.title=r.n; d.style.background=r.c;
+        d.onclick=function(){
+          state[key]=r.n;
+          var kids=box.children;
+          for(var k=0;k<kids.length;k++) kids[k].classList.remove("sel");
+          d.classList.add("sel"); preview();
+        };
+        box.appendChild(d);
+      });
+      body.appendChild(box);
+    }
+    preview();
+  }
+  $(p+"Prev").onclick=function(){ stepIdx=(stepIdx+2)%3; render(); };
+  $(p+"Next").onclick=function(){ stepIdx=(stepIdx+1)%3; render(); };
+  render();
+  return { refresh:render };
+}
+var wiz = { step:1, name:"", voice:"female", pers:"balanced", wallpaper:"blue", orb:"pink", aura:"blue", ding:"classic",
+            tabIcon:"o", tabBg:"blue", tabColor:"white" };
 var wizStarted = false;
 
 function startWizard(){
@@ -1026,7 +1199,9 @@ function startWizard(){
   wizStarted = true;
   // progress dots
   var p = $("progress");
-  for(var i=1;i<=6;i++){ var d=document.createElement("div"); d.className="pdot"+(i===1?" on":""); p.appendChild(d); }
+  for(var i=1;i<=7;i++){ var d=document.createElement("div"); d.className="pdot"+(i===1?" on":""); p.appendChild(d); }
+  // tab icon stepper on step 7 (shares the live wizard state)
+  initTabIconStepper("wTi", wiz);
   // floating particles (little animated flourishes)
   var pc = $("particles");
   for(var j=0;j<26;j++){
@@ -1099,9 +1274,10 @@ function startWizard(){
       $("aiName").style.borderColor="";
       wiz.name=nm;
     }
-    if(wiz.step<6){ goStep(wiz.step+1); }
+    if(wiz.step<7){ goStep(wiz.step+1); }
     else {
-      var done={name:wiz.name,voice:wiz.voice,pers:wiz.pers,wallpaper:wiz.wallpaper,orb:wiz.orb,aura:wiz.aura,ding:wiz.ding};
+      var done={name:wiz.name,voice:wiz.voice,pers:wiz.pers,wallpaper:wiz.wallpaper,orb:wiz.orb,aura:wiz.aura,ding:wiz.ding,
+                tabIcon:wiz.tabIcon,tabBg:wiz.tabBg,tabColor:wiz.tabColor};
       saveSettings(done);
       hide("wizard");
       startHud(done, true); // first run: greet out loud
@@ -1118,7 +1294,7 @@ function goStep(n){
   var dots=document.querySelectorAll("#progress .pdot");
   for(var j=0;j<dots.length;j++) dots[j].classList.toggle("on", j<n);
   $("wizBack").style.visibility = n===1 ? "hidden" : "visible";
-  $("wizNext").textContent = n===6 ? "Meet my AI" : "Next";
+  $("wizNext").textContent = n===7 ? "Meet my AI" : "Next";
   if(n===6){
     // aura step preview: current orb body + current aura glow
     var oc=rainColor(wiz.orb,RAINBOW[6]), ac=rainColor(wiz.aura,RAINBOW[4]);
@@ -1734,6 +1910,8 @@ function openDoc(title, text){
   $("docBody").style.display="";
   var ea=$("docEditArea"); if(ea) ea.remove();
   $("docEditBar").classList.add("hidden");
+  $("docEdit").style.display=""; $("docCopy").style.display="";
+  isNewNote=false;
   // every generated doc becomes a note (or updates the existing one)
   var existing=null;
   if(curNoteId){ existing=notes.filter(function(n){return n.id===curNoteId;})[0]; }
@@ -1742,9 +1920,27 @@ function openDoc(title, text){
   saveNotes();
   show("docWin");
 }
+var isNewNote=false;
+function newNote(){
+  hide("notepadModal");
+  curNoteId=null; isNewNote=true;
+  $("docTitle").innerHTML='<input id="docTitleInput" placeholder="Name your note..." maxlength="60" autocomplete="off">';
+  $("docBody").style.display="none";
+  var ea=$("docEditArea"); if(ea) ea.remove();
+  ea=document.createElement("textarea");
+  ea.id="docEditArea"; ea.placeholder="Write your note...";
+  $("docBody").parentNode.insertBefore(ea, $("docEditBar"));
+  $("docEditBar").classList.remove("hidden");
+  $("docEdit").style.display="none"; $("docCopy").style.display="none";
+  show("docWin");
+  setTimeout(function(){ var i=$("docTitleInput"); if(i) i.focus(); },50);
+}
+$("noteAdd").onclick=function(){ newNote(); };
 function closeDoc(){
   // closing keeps the note in the notepad — use Scrap to erase forever
-  curNoteId=null;
+  curNoteId=null; isNewNote=false;
+  var ti=$("docTitleInput"); if(ti) $("docTitle").textContent=ti.value.trim()||"Document";
+  $("docEdit").style.display=""; $("docCopy").style.display="";
   hide("docWin");
 }
 $("docEdit").onclick=function(){
@@ -1761,10 +1957,18 @@ $("docSave").onclick=function(){
   // save: keep edits, back to view mode so you can copy or close
   var ea=$("docEditArea");
   var text=ea?ea.value:"";
-  if(curNoteId){
+  var ti=$("docTitleInput");
+  var title=(ti?ti.value.trim():"")||$("docTitle").textContent||"Untitled";
+  if(isNewNote){
+    curNoteId="n"+Date.now();
+    notes.unshift({id:curNoteId, title:title||"Untitled", text:text, ts:Date.now()});
+    saveNotes(); isNewNote=false;
+  }else if(curNoteId){
     var n=notes.filter(function(x){return x.id===curNoteId;})[0];
     if(n){ n.text=text; n.ts=Date.now(); saveNotes(); }
   }
+  if(ti) $("docTitle").textContent=title||"Untitled";
+  $("docEdit").style.display=""; $("docCopy").style.display="";
   if(ea) ea.remove();
   $("docBody").textContent=text;
   $("docBody").style.display="";
@@ -1776,6 +1980,9 @@ $("docScrap").onclick=function(){
     notes=notes.filter(function(x){return x.id!==curNoteId;});
     saveNotes(); curNoteId=null;
   }
+  isNewNote=false;
+  var ti=$("docTitleInput"); if(ti) $("docTitle").textContent="Document";
+  $("docEdit").style.display=""; $("docCopy").style.display="";
   var ea=$("docEditArea"); if(ea) ea.remove();
   hide("docWin");
 };
@@ -1803,12 +2010,13 @@ function openNotepad(){
       item.appendChild(name); item.appendChild(date); item.appendChild(del);
       item.onclick=function(){
         hide("notepadModal");
-        curNoteId=n.id;
+        curNoteId=n.id; isNewNote=false;
         $("docTitle").textContent=n.title||"Document";
         $("docBody").textContent=n.text||"";
         $("docBody").style.display="";
         var ea=$("docEditArea"); if(ea) ea.remove();
         $("docEditBar").classList.add("hidden");
+        $("docEdit").style.display=""; $("docCopy").style.display="";
         show("docWin");
       };
       list.appendChild(item);
@@ -2034,9 +2242,11 @@ $("setVoice").onclick=function(){
 };
 $("menuCustom").onclick=function(){
   closeMenu();
-  themeTmp={wallpaper:S.wallpaper, orb:S.orb, aura:S.aura};
+  themeTmp={wallpaper:S.wallpaper, orb:S.orb, aura:S.aura, tabIcon:S.tabIcon||"o", tabBg:S.tabBg||"blue", tabColor:S.tabColor||"white"};
   $("setName").value=S.name; $("setName").style.borderColor="";
   buildThemeSwatches();
+  themeTab("A");
+  mTiStepper=initTabIconStepper("mTi", themeTmp); // fresh each open: new themeTmp object
   show("themeModal");
 };
 $("linksClose").onclick=function(){ hide("linksModal"); };
@@ -2144,7 +2354,7 @@ function popDragEnd(){ popDrag=null; document.body.classList.remove("popDragging
 })();
 
 /* ================= CHAT ================= */
-var S = { name:"Ondra", wake:"hey", voice:"female", pers:"balanced", wallpaper:"blue", orb:"pink", aura:"blue", voiceMuted:false };
+var S = { name:"Ondra", wake:"hey", voice:"female", pers:"balanced", wallpaper:"blue", orb:"pink", aura:"blue", voiceMuted:false, tabIcon:"o", tabBg:"blue", tabColor:"white" };
 var thinking=false;
 
 /* ================= CONVERSATION MEMORY =================
@@ -2809,13 +3019,33 @@ function buildThemeSwatches(){
   row("setWall","wallpaper"); row("setOrb","orb"); row("setAura","aura");
 }
 var gb=$("gearBtn"); if(gb) gb.onclick=function(){
-  themeTmp={wallpaper:S.wallpaper, orb:S.orb, aura:S.aura};
+  themeTmp={wallpaper:S.wallpaper, orb:S.orb, aura:S.aura, tabIcon:S.tabIcon||"o", tabBg:S.tabBg||"blue", tabColor:S.tabColor||"white"};
   $("setName").value=S.name; $("setName").style.borderColor="";
   buildThemeSwatches();
   show("themeModal");
 };
 $("themeCancel").onclick=function(){ hide("themeModal"); };
 $("themeModal").onclick=function(e){ if(e.target===$("themeModal")) hide("themeModal"); };
+/* customization modal tabs: Appearance | Tab Icon */
+var mTiStepper=null;
+function themeTab(which){
+  $("themeTabBtnA").classList.toggle("sel", which==="A");
+  $("themeTabBtnI").classList.toggle("sel", which==="I");
+  $("themeTabA").classList.toggle("hidden", which!=="A");
+  $("themeTabI").classList.toggle("hidden", which!=="I");
+  if(which==="I" && mTiStepper) mTiStepper.refresh();
+}
+$("themeTabBtnA").onclick=function(){ themeTab("A"); };
+$("themeTabBtnI").onclick=function(){ themeTab("I"); };
+$("tabIconSave").onclick=function(){
+  S.tabIcon=themeTmp.tabIcon; S.tabBg=themeTmp.tabBg; S.tabColor=themeTmp.tabColor;
+  var st=settings()||{};
+  st.tabIcon=S.tabIcon; st.tabBg=S.tabBg; st.tabColor=S.tabColor;
+  saveSettings(st);
+  applyTabIcon();
+  hide("themeModal");
+  flashHint("Tab icon updated.");
+};
 /* ---------- welcome (first run) ---------- */
 function closeWelcome(){ hide("welcomeModal"); try{ lsSet("gcai_seenWelcome","1"); }catch(e){} }
 $("welcomeClose").onclick=function(){ closeWelcome(); };
@@ -2830,9 +3060,12 @@ $("themeSave").onclick=function(){
   var nameChanged=(nm!==S.name);
   S.name=nm;
   S.wallpaper=themeTmp.wallpaper; S.orb=themeTmp.orb; S.aura=themeTmp.aura;
+  S.tabIcon=themeTmp.tabIcon; S.tabBg=themeTmp.tabBg; S.tabColor=themeTmp.tabColor;
   saveSettings({name:S.name,voice:S.voice,pers:S.pers,
-    wallpaper:S.wallpaper,orb:S.orb,aura:S.aura,ding:S.ding,voiceMuted:S.voiceMuted});
+    wallpaper:S.wallpaper,orb:S.orb,aura:S.aura,ding:S.ding,voiceMuted:S.voiceMuted,
+    tabIcon:S.tabIcon,tabBg:S.tabBg,tabColor:S.tabColor});
   applyTheme(S);
+  applyTabIcon();
   $("hudName").textContent=S.name;
   document.title=S.name;
   setWakeHint();
@@ -2947,8 +3180,10 @@ function startHud(st, sayHi){
   S.name=st.name; S.wake=st.wake||"hey"; S.voice=st.voice; S.pers=st.pers;
   S.wallpaper=st.wallpaper; S.orb=st.orb; S.aura=st.aura||st.orb||"blue";
   S.ding=st.ding||"classic"; S.voiceMuted=!!st.voiceMuted;
+  S.tabIcon=st.tabIcon||"o"; S.tabBg=st.tabBg||"blue"; S.tabColor=st.tabColor||"white";
   updateVoiceBtn();
   applyTheme(st);
+  applyTabIcon();
   $("hudName").textContent=st.name;
   document.title=st.name; // tab shows their AI's name once it's made
   $("hudSub").textContent="Ondra Demo · "+st.pers;
@@ -2984,6 +3219,8 @@ $("q").addEventListener("keydown",function(e){ if(e.key==="Enter"){ var v=$("q")
 // boot: maintenance gate — owners bypass, everyone else sees the notice
 // (maintenance is visible by default in HTML; hide it for owners)
 var _boot=settings();
+// default tab icon right away (shows during wizard/maintenance too)
+try{ applyTabIcon(); }catch(e){}
 if(MAINTENANCE && isOwner()){
   hide("maintenance");
   // admin button stays hidden until the Admin Panel is built
