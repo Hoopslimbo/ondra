@@ -203,10 +203,32 @@
   .req-pill { font-size:13px; color:#c7d0e0; background:#141a26; border:1px solid #2a3140;
               padding:8px 14px; border-radius:20px; }
   .req-pill b { color:#8ab4ff; }
-  #notepadBtn { margin-left:8px; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:20px;
+  /* top-right feature menu */
+  #menuBtn { margin-left:8px; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:20px;
               background:#141a26; border:2px solid #2a3140; transition:all .2s ease; line-height:1;
               display:inline-flex; align-items:center; justify-content:center; vertical-align:middle; }
-  #notepadBtn:hover { border-color:#8ab4ff; transform:scale(1.08); }
+  #menuBtn:hover { border-color:#8ab4ff; transform:scale(1.08); }
+  #menuBtn svg { transition:transform .25s ease; }
+  #menuBtn.open svg { transform:rotate(180deg); }
+  #menuBar { position:fixed; top:70px; right:18px; z-index:95; display:flex; flex-direction:column; gap:8px;
+           padding:12px; border-radius:20px; min-width:180px;
+           background:
+             linear-gradient(160deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.03) 28%, rgba(255,255,255,0) 55%),
+             rgba(16,20,29,.7);
+           -webkit-backdrop-filter:blur(24px) saturate(1.7);
+           backdrop-filter:blur(24px) saturate(1.7);
+           border:1px solid rgba(255,255,255,.2);
+           box-shadow:0 16px 56px rgba(0,0,0,.5),
+                      inset 0 1px 1px rgba(255,255,255,.35);
+           transform-origin:top center;
+           animation:menuDrop .28s ease; }
+  #menuBar.hidden { display:none; }
+  @keyframes menuDrop { from { opacity:0; transform:scaleY(.6) translateY(-12px); } to { opacity:1; transform:scaleY(1) translateY(0); } }
+  #menuBar button { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:14px;
+           border:1px solid rgba(255,255,255,.12);
+           background:linear-gradient(160deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.02) 100%);
+           color:#eef1f6; font-size:14px; font-weight:500; cursor:pointer; transition:all .2s ease; text-align:left; }
+  #menuBar button:hover { border-color:#8ab4ff; transform:translateX(-2px); }
   #addonBtn { margin-left:8px; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:20px;
               background:#141a26; border:2px solid #2a3140; transition:all .2s ease; line-height:1;
               display:inline-flex; align-items:center; justify-content:center; vertical-align:middle; }
@@ -658,7 +680,12 @@
   <div class="hud-top">
     <div class="who"><span id="hudName">Ondra</span><small id="hudSub">Ondra</small></div>
     <div>
-      <button id="notepadBtn" data-tip="Notepad" aria-label="Notepad"><svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true"><path d="M6 2h12a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm1 3v14h10V5H7zm2 3h6v1.5H9V8zm0 3.5h6V13H9v-1.5zm0 3.5h4v1.5H9V15z"/></svg></button><button id="addonBtn" data-tip="Add-ons" aria-label="Add-ons"><svg viewBox="0 0 24 24" width="24" height="24" fill="#fff" aria-hidden="true"><rect x="5" y="7" width="13" height="12" rx="2.5"/><circle cx="11.5" cy="7" r="3"/><circle cx="18" cy="13" r="3"/></svg></button><button id="gearBtn" data-tip="Settings" aria-label="Settings"><span class="gear-ico">&#9881;</span></button>
+      <button id="menuBtn" data-tip="Menu" aria-label="Menu"><svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg></button><button id="gearBtn" data-tip="Settings" aria-label="Settings"><span class="gear-ico">&#9881;</span></button>
+  <!-- feature menu: slides down from the top-right -->
+  <div id="menuBar" class="hidden">
+    <button id="menuAddon" data-tip="Add-ons" aria-label="Add-ons"><svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true"><rect x="5" y="7" width="13" height="12" rx="2.5"/><circle cx="11.5" cy="7" r="3"/><circle cx="18" cy="13" r="3"/></svg><span>Add-ons</span></button>
+    <button id="menuNotes" data-tip="Notepad" aria-label="Notepad"><svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true"><path d="M6 2h12a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm1 3v14h10V5H7zm2 3h6v1.5H9V8zm0 3.5h6V13H9v-1.5zm0 3.5h4v1.5H9V15z"/></svg><span>Notepad</span></button>
+  </div>
     </div>
   </div>
   <div class="stage">
@@ -1695,7 +1722,29 @@ function openNotepad(){
   }
   show("notepadModal");
 }
-$("notepadBtn").onclick=function(){ openNotepad(); };
+/* ================= FEATURE MENU ================= */
+$("menuBtn").onclick=function(){
+  var bar=$("menuBar");
+  var opening=bar.classList.contains("hidden");
+  if(opening){ bar.classList.remove("hidden"); $("menuBtn").classList.add("open"); }
+  else{ bar.classList.add("hidden"); $("menuBtn").classList.remove("open"); }
+};
+// click outside closes the menu
+document.addEventListener("click", function(e){
+  var bar=$("menuBar");
+  if(!bar.classList.contains("hidden") &&
+     !$("menuBtn").contains(e.target) && !bar.contains(e.target)){
+    bar.classList.add("hidden"); $("menuBtn").classList.remove("open");
+  }
+});
+$("menuAddon").onclick=function(){
+  $("menuBar").classList.add("hidden"); $("menuBtn").classList.remove("open");
+  show("addonModal");
+};
+$("menuNotes").onclick=function(){
+  $("menuBar").classList.add("hidden"); $("menuBtn").classList.remove("open");
+  openNotepad();
+};
 $("notepadClose").onclick=function(){ hide("notepadModal"); };
 $("notepadModal").onclick=function(e){ if(e.target===$("notepadModal")) hide("notepadModal"); };
 function doLongForm(query){
@@ -2376,7 +2425,6 @@ setInterval(function(){ if($("hud").classList.contains("hidden")) return;   },10
 // Re-probe the brain chain every 90s so a brain that recovers comes back
 // on its own instead of staying blacklisted until reload.
 setInterval(function(){ if($("hud").classList.contains("hidden")) return; probeAll(); },90000);
-$("addonBtn").onclick=function(){  show("addonModal"); };
 $("addonClose").onclick=function(){ hide("addonModal"); };
 $("addonModal").onclick=function(e){ if(e.target===$("addonModal")) hide("addonModal"); };
 /* Owner access code: top-left button, visible on every screen. */
