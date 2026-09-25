@@ -1043,8 +1043,6 @@ function playDing(name){
     if(actx&&actx.state==="suspended"){ var p=actx.resume(); if(p&&p.catch) p.catch(function(){}); }
   }catch(e){}
   try{ d.play(); }catch(e){}
-  // retry once after a beat in case the context was still waking up
-  setTimeout(function(){ try{ d.play(); }catch(e){} }, 400);
 }
 
 /* Emojis show in text but are never read aloud (same rule as LUNA). */
