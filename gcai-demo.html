@@ -232,12 +232,18 @@
   #micBtn { width:52px; height:52px; flex:0 0 52px; border-radius:50%; border:2px solid #2a3140;
             background:#141a26; cursor:pointer; position:relative; transition:all .2s ease; }
   /* Owner code button: fixed top-left, visible on every screen — matches Add-ons button design */
-  #codeBtn { position:fixed; top:12px; left:12px; z-index:9999; width:40px; height:40px;
+  #codeBtn { position:fixed; top:12px; left:12px; z-index:9999; width:44px; height:44px;
              border-radius:50%; cursor:pointer; font-size:20px; line-height:1;
-             background:#141a26; border:2px solid #2a3140; transition:all .2s ease;
+             background:linear-gradient(145deg, #1e2532, #12161f);
+             border:1px solid rgba(138,180,255,.3); transition:all .2s ease;
              color:#fff; font-family:monospace; font-weight:bold;
-             display:inline-flex; align-items:center; justify-content:center; }
-  #codeBtn:hover { border-color:#8ab4ff; transform:scale(1.08); }
+             display:inline-flex; align-items:center; justify-content:center;
+             box-shadow:0 4px 16px rgba(0,0,0,.4), 0 0 0 1px rgba(255,255,255,.04) inset;
+             backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
+  #codeBtn:hover { border-color:#8ab4ff; transform:scale(1.1);
+             box-shadow:0 6px 24px rgba(138,180,255,.3), 0 0 0 1px rgba(255,255,255,.08) inset; }
+  #codeBtn:active { transform:scale(.95); }
+  #codeBtn[data-tip]:hover::before{ left:0; transform:none; }
   /* Code input: mini white rectangle */
   #codeInput.white-field { background:#fff; color:#111; border:2px solid #fff; border-radius:8px;
              padding:10px 12px; font-size:16px; font-family:monospace; width:100%; box-sizing:border-box; }
@@ -639,7 +645,7 @@
 </div>
 
 <!-- Code button: fixed top-left, visible on every screen -->
-<button id="codeBtn" data-tip="Access code" aria-label="Access code">&lt;/&gt;</button>
+<button id="codeBtn" data-tip="Codes" aria-label="Codes">&lt;/&gt;</button>
 
 <script>
 (function(){
