@@ -1424,33 +1424,51 @@ function openDoc(title, text){
 function closeDoc(){ hide("docWin"); }
 function doLongForm(query){
   thinking=true;
-  $("subtitle").textContent="Writing…";
-  var sys=sysPrompt()+" Write the requested piece in full. Output ONLY the document text — no intro, no outro, no commentary. If a person, character, or place name seems misspelled or unfamiliar, use the most likely correct spelling and subject — never invent a different person or put them in the wrong franchise. When in doubt about a name, write about the real subject, not a hallucinated one.";
-  askBrain(histPrompt()+"\n\nUser request: "+query, sys).then(function(r){
-    thinking=false;
-    $("subtitle").textContent="";
-    // title: extract the topic, not the full command
-    // "write an essay on George Washington" -> "George Washington"
-    var title=query;
-    var m=query.match(/\b(?:write|draft|compose|create|make)\b[\s\S]{0,20}?\b(?:an?|the)\b\s+(essay|story|stories|poem|report|speech|article|paragraph)\b\s+(?:on|about|for)\s+(.+?)[?.!]*$/i);
-    if(m&&m[2]){
-      var topic=m[2].trim();
-      var kind=m[1].toLowerCase();
-      kind=kind.charAt(0).toUpperCase()+kind.slice(1);
-      title=kind+": "+topic.charAt(0).toUpperCase()+topic.slice(1);
-    }else{
-      // fallback: strip command verbs
-      title=query.replace(/^(please\s+)?(write|draft|compose|create|make)\s+(me\s+)?(an?\s+)?/i,"").trim();
-      title=title.charAt(0).toUpperCase()+title.slice(1);
-      if(title.length>50) title=title.slice(0,50)+"…";
-    }
-    openDoc(title, r.text);
-    say("I've written it — it's in the window on the right.", "");
-  }).catch(function(){
-    thinking=false;
-    $("subtitle").textContent="";
-    say("Every brain is having a moment right now. Give it a few seconds and try again.","offline");
-  });
+  $("subtitle").textContent="Researching…";
+  // extract the topic for research
+  var topic=query;
+  var tm=query.match(/\b(?:write|draft|compose|create|make)\b[\s\S]{0,20}?\b(?:an?|the)\b\s+(?:essay|story|stories|poem|report|speech|article|paragraph)\b\s+(?:on|about|for)\s+(.+?)[?.!]*$/i);
+  if(tm&&tm[1]) topic=tm[1].trim();
+  // quick Wikipedia research before writing
+  function writeIt(research){
+    $("subtitle").textContent="Writing…";
+    var sys=sysPrompt()+" Write the requested piece in full. Output ONLY the document text — no intro, no outro, no commentary. If a person, character, or place name seems misspelled or unfamiliar, use the most likely correct spelling and subject — never invent a different person or put them in the wrong franchise. When in doubt about a name, write about the real subject, not a hallucinated one.";
+    var prompt=histPrompt()+"\n\nUser request: "+query;
+    if(research) prompt+="\n\nBackground research (use these facts):\n"+research;
+    askBrain(prompt, sys).then(function(r){
+      thinking=false;
+      $("subtitle").textContent="";
+      var title=query;
+      var m=query.match(/\b(?:write|draft|compose|create|make)\b[\s\S]{0,20}?\b(?:an?|the)\b\s+(essay|story|stories|poem|report|speech|article|paragraph)\b\s+(?:on|about|for)\s+(.+?)[?.!]*$/i);
+      if(m&&m[2]){
+        var tpc=m[2].trim();
+        var kind=m[1].toLowerCase();
+        kind=kind.charAt(0).toUpperCase()+kind.slice(1);
+        title=kind+": "+tpc.charAt(0).toUpperCase()+tpc.slice(1);
+      }else{
+        title=query.replace(/^(please\s+)?(write|draft|compose|create|make)\s+(me\s+)?(an?\s+)?/i,"").trim();
+        title=title.charAt(0).toUpperCase()+title.slice(1);
+        if(title.length>50) title=title.slice(0,50)+"…";
+      }
+      openDoc(title, r.text);
+      say("I've written it — it's in the window on the right.", "");
+    }).catch(function(){
+      thinking=false;
+      $("subtitle").textContent="";
+      say("Every brain is having a moment right now. Give it a few seconds and try again.","offline");
+    });
+  }
+  // try Wikipedia for background facts (non-blocking, 5s timeout)
+  try{
+    withTimeout(fetch("https://en.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(topic),
+      {headers:{"Accept":"application/json"}}).then(function(r){
+        if(!r.ok) throw 0; return r.json();
+      }).then(function(j){
+        var research=j.extract||"";
+        if(j.title) research="Subject: "+j.title+"\n"+research;
+        writeIt(research||null);
+      }).catch(function(){ writeIt(null); }), 5000).catch(function(){ writeIt(null); });
+  }catch(e){ writeIt(null); }
 }
 function closePopup(){
   if(popupClockTimer){ clearInterval(popupClockTimer); popupClockTimer=null; }
