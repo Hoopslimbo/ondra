@@ -1537,10 +1537,10 @@ var thinking=false;
    one borrowed full-version feature.) */
 var hist=[];
 function pushHist(w,t){
-  t=String(t||"").replace(/\s+/g," ").trim().slice(0,150);
+  t=String(t||"").replace(/\s+/g," ").trim().slice(0,200);
   if(!t) return;
   hist.push({w:w,t:t});
-  while(hist.length>6) hist.shift();
+  while(hist.length>10) hist.shift();
 }
 function histPrompt(){
   if(!hist.length) return "";
@@ -1641,7 +1641,10 @@ function localAnswer(q){
   var t=String(q||"").toLowerCase().trim();
   var pers=S.pers||"balanced";
   // greetings & small talk — never Wikipedia these. Personality-aware.
-  if(/^(what'?s up|whats up|what up|sup|hey|hi|hello|yo|hiya|howdy)\b/.test(t)){
+  // But if we're already mid-conversation (history exists), let the brain
+  // handle it with context instead of a canned line.
+  var midChat=hist.length>2;
+  if(!midChat&&/^(what'?s up|whats up|what up|sup|hey|hi|hello|yo|hiya|howdy)\b/.test(t)){
     if(pers==="cheerful"){
       var c=["Hey! So good to see you! What's up?","Hiya! I'm having a great day — how about you?","Hey hey! What's going on?"];
       return c[Math.floor(Math.random()*c.length)];
@@ -1653,17 +1656,17 @@ function localAnswer(q){
     var b=["Hey! What's going on?","Hey there — what can I do for you?","Hi! How can I help?"];
     return b[Math.floor(Math.random()*b.length)];
   }
-  if(/^(what'?s (new|happening|going on|good|poppin|poping)|whats (new|happening|good))\b/.test(t)){
+  if(!midChat&&/^(what'?s (new|happening|going on|good|poppin|poping)|whats (new|happening|good))\b/.test(t)){
     if(pers==="cheerful") return "So much! I'm excited to help — what are we doing today?";
     if(pers==="moody") return "Nothing. Absolutely nothing. What do you need?";
     return "Not much — just here and ready to help. What's on your mind?";
   }
-  if(/^(how are you|how'?s it going|hows it going|how are things|how do you feel)\b/.test(t)){
+  if(!midChat&&/^(how are you|how'?s it going|hows it going|how are things|how do you feel)\b/.test(t)){
     if(pers==="cheerful") return "I'm fantastic, thanks for asking! Ready to take on the day — how about you?";
     if(pers==="moody") return "I'm a program. I don't have feelings. But sure, I'm 'fine.' You?";
     return "I'm doing great, thanks for asking! How about you?";
   }
-  if(/^(good ?morning|good ?afternoon|good ?evening)\b/.test(t)){
+  if(!midChat&&/^(good ?morning|good ?afternoon|good ?evening)\b/.test(t)){
     var part=t.indexOf("morning")>=0?"morning":t.indexOf("afternoon")>=0?"afternoon":"evening";
     if(pers==="cheerful") return "Good "+part+"! Beautiful day, isn't it? What can I do for you?";
     if(pers==="moody") return "Yeah, "+part+". What do you need?";
