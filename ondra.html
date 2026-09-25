@@ -184,6 +184,7 @@
         box-shadow:0 0 0 1px rgba(0,0,0,.18);
         transition:all .2s ease; }
   .sw:hover { transform:scale(1.12); }
+  .sw-clear { background:repeating-conic-gradient(#9aa3b2 0 25%, #ffffff 0 50%) 0 0/16px 16px !important; }
   .sw.sel { border-color:#fff; box-shadow:0 0 16px #ffffff55; animation:pop .25s ease; }
   .wiz-nav { display:flex; gap:10px; max-width:340px; margin:0 auto; }
   .wiz-nav .btn { margin:0; }
@@ -1094,9 +1095,31 @@ var RAINBOW = [
   {n:"pink",c:"#ff375f"},
   {n:"black",c:"#111111"},{n:"white",c:"#ffffff"},{n:"gray",c:"#6e747c"}
 ];
+/* rainbow + clear: special color choices. rainbow works everywhere;
+   clear is only offered in the tab-icon color pickers. */
+var RB_STOPS=[["0","#ff3b30"],["0.17","#ff9500"],["0.33","#ffcc00"],["0.5","#34c759"],
+              ["0.67","#0a84ff"],["0.83","#bf5af2"],["1","#ff375f"]];
+var RB_CSS="linear-gradient(135deg,#ff3b30,#ff9500,#ffcc00,#34c759,#0a84ff,#bf5af2,#ff375f)";
+function isRainbow(n){ return n==="rainbow"; }
+function swatchBg(r){
+  // what a color swatch shows: rainbow gets the gradient
+  return isRainbow(r.n)?RB_CSS:r.c;
+}
+function appendRainbowSwatch(box, isSel, onPick){
+  var d=document.createElement("div");
+  d.className="sw"+(isSel?" sel":"");
+  d.title="rainbow"; d.style.background=RB_CSS;
+  d.onclick=function(){
+    var kids=box.children;
+    for(var k=0;k<kids.length;k++) kids[k].classList.remove("sel");
+    d.classList.add("sel");
+    onPick("rainbow");
+  };
+  box.appendChild(d);
+}
 /* ---- customizable browser tab icon ---- */
 var TAB_ICONS = [
-  {n:"o", label:"O", path:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 5a5 5 0 1 1 0 10 5 5 0 0 1 0-10z", rule:"evenodd"},
+  {n:"o", label:"Ondra O", path:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 5a5 5 0 1 1 0 10 5 5 0 0 1 0-10z", rule:"evenodd"},
   {n:"sparkle", label:"Sparkle", path:"M12 2c.8 5.4 2.6 7.2 8 8-5.4.8-7.2 2.6-8 8-.8-5.4-2.6-7.2-8-8 5.4-.8 7.2-2.6 8-8z"},
   {n:"bolt", label:"Bolt", path:"M13 2L4.5 13.5H11L9.5 22 19 10h-6.5L13 2z"},
   {n:"heart", label:"Heart", path:"M12 21C6 16.5 2.5 13 2.5 9.3 2.5 6.4 4.8 4 7.7 4c1.7 0 3.3.9 4.3 2.4C13 4.9 14.6 4 16.3 4c2.9 0 5.2 2.4 5.2 5.3 0 3.7-3.5 7.2-9.5 11.7z"},
@@ -1115,12 +1138,23 @@ var TAB_ICONS = [
   {n:"rocket", label:"Rocket", path:"M12 2c4 3 6 7 6 11l3 4-4 1c-1 2-3 3.6-5 4.2-2-.6-4-2.2-5-4.2l-4-1 3-4c0-4 2-8 6-11z"},
   {n:"paw", label:"Paw", path:"M12 12.5c-3 0-5.5 2.2-5.5 4.5 0 1.5 1.2 2.5 2.8 2.5 1 0 1.8-.4 2.7-.4s1.7.4 2.7.4c1.6 0 2.8-1 2.8-2.5 0-2.3-2.5-4.5-5.5-4.5zM6.2 7.4a1.7 1.7 0 1 0 3.4 0 1.7 1.7 0 1 0-3.4 0zM9.8 4.6a1.7 1.7 0 1 0 3.4 0 1.7 1.7 0 1 0-3.4 0zM14.2 4.6a1.7 1.7 0 1 0 3.4 0 1.7 1.7 0 1 0-3.4 0zM17.8 7.4a1.7 1.7 0 1 0 3.4 0 1.7 1.7 0 1 0-3.4 0z"}
 ];
-function tabIconSVG(iconName, outlineColor, fgColor, size){
+function tabIconSVG(iconName, outlineName, fgName, size){
   var ic = TAB_ICONS.filter(function(t){ return t.n===iconName; })[0] || TAB_ICONS[0];
   var rule = ic.rule ? ' fill-rule="'+ic.rule+'"' : '';
+  // resolve colors: rainbow -> svg gradient, clear -> none, else hex
+  var needRb = isRainbow(outlineName)||isRainbow(fgName);
+  var defs = needRb ? '<defs><linearGradient id="tirb" x1="0" y1="0" x2="1" y2="1">' +
+    RB_STOPS.map(function(s){ return '<stop offset="'+s[0]+'" stop-color="'+s[1]+'"/>'; }).join("") +
+    '</linearGradient></defs>' : '';
+  function tc(n){
+    if(isRainbow(n)) return "url(#tirb)";
+    if(n==="clear") return "none";
+    return rainColor(n, RAINBOW[8]).c;
+  }
   // transparent background — the icon itself carries the outline; drawn large
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="'+size+'" height="'+size+'">'
-    + '<g transform="translate(6,6) scale(2.1667)" fill="'+fgColor+'" stroke="'+outlineColor+'" stroke-width="2.4" stroke-linejoin="round">'
+    + defs
+    + '<g transform="translate(6,6) scale(2.1667)" fill="'+tc(fgName)+'" stroke="'+tc(outlineName)+'" stroke-width="2.4" stroke-linejoin="round">'
     + '<path d="'+ic.path+'"'+rule+'/></g></svg>';
 }
 function setFavicon(url){
@@ -1129,8 +1163,7 @@ function setFavicon(url){
   l.type = 'image/png'; l.href = url;
 }
 function makeFavicon(iconName, outlineName, fgName){
-  var ol = rainColor(outlineName, RAINBOW[8]).c, fg = rainColor(fgName, RAINBOW[8]).c;
-  var svg = tabIconSVG(iconName, ol, fg, 64);
+  var svg = tabIconSVG(iconName, outlineName||"white", fgName||"white", 64);
   var img = new Image();
   img.onload = function(){
     try{
@@ -1151,10 +1184,8 @@ function initTabIconStepper(p, state){
   var stepIdx=0;
   var names=["Outline","Icon","Icon color"];
   function preview(){
-    var ol=rainColor(state.tabOutline||state.tabBg||"white",RAINBOW[8]).c;
-    var fg=rainColor(state.tabColor||"white",RAINBOW[8]).c;
     var pv=$(p+"Preview");
-    pv.innerHTML=tabIconSVG(state.tabIcon||"o",ol,fg,60);
+    pv.innerHTML=tabIconSVG(state.tabIcon||"o", state.tabOutline||state.tabBg||"white", state.tabColor||"white", 60);
   }
   function render(){
     $(p+"Name").textContent=names[stepIdx];
@@ -1178,18 +1209,27 @@ function initTabIconStepper(p, state){
     }else{
       var key=stepIdx===0?"tabOutline":"tabColor";
       var box=document.createElement("div"); box.className="swatches sm";
+      function markSel(el){
+        var kids=box.children;
+        for(var k=0;k<kids.length;k++) kids[k].classList.remove("sel");
+        el.classList.add("sel"); preview();
+      }
       RAINBOW.forEach(function(r){
         var d=document.createElement("div");
         d.className="sw"+(state[key]===r.n?" sel":"");
         d.title=r.n; d.style.background=r.c;
-        d.onclick=function(){
-          state[key]=r.n;
-          var kids=box.children;
-          for(var k=0;k<kids.length;k++) kids[k].classList.remove("sel");
-          d.classList.add("sel"); preview();
-        };
+        d.onclick=function(){ state[key]=r.n; markSel(d); };
         box.appendChild(d);
       });
+      appendRainbowSwatch(box, state[key]==="rainbow", function(name){
+        state[key]=name; preview();
+      });
+      // clear: transparent — icon colors only, nothing else
+      var cd=document.createElement("div");
+      cd.className="sw sw-clear"+(state[key]==="clear"?" sel":"");
+      cd.title="clear";
+      cd.onclick=function(){ state[key]="clear"; markSel(cd); };
+      box.appendChild(cd);
       body.appendChild(box);
     }
     preview();
@@ -1228,24 +1268,30 @@ function startWizard(){
   // swatches
   function buildSwatches(elId, key, onPick){
     var box = $(elId);
+    function pick(name, r){
+      wiz[key]=name;
+      var kids=box.children;
+      for(var k=0;k<kids.length;k++) kids[k].classList.remove("sel");
+      for(var j=0;j<kids.length;j++){ if(kids[j].title===name){ kids[j].classList.add("sel"); break; } }
+      if(onPick) onPick(name);
+    }
     RAINBOW.forEach(function(r){
       var d=document.createElement("div");
       d.className="sw"+(wiz[key]===r.n?" sel":"");
       d.title=r.n; d.style.background=r.c; d.setAttribute("data-c",r.n);
-      d.onclick=function(){
-        wiz[key]=r.n;
-        var kids=box.children;
-        for(var k=0;k<kids.length;k++) kids[k].classList.remove("sel");
-        d.classList.add("sel");
-        if(onPick) onPick(r);
-      };
+      d.onclick=function(){ pick(r.n, r); };
       box.appendChild(d);
     });
+    appendRainbowSwatch(box, wiz[key]==="rainbow", function(){ pick("rainbow"); });
   }
   buildSwatches("wallSwatches","wallpaper");
-  buildSwatches("orbSwatches","orb",function(r){ $("orbPreview").style.background=orbBg(r.c); });
-  buildSwatches("auraSwatches","aura",function(r){
-    $("auraPreview").style.boxShadow="0 0 46px 14px "+rgba(r.c,0.55);
+  buildSwatches("orbSwatches","orb",function(n){
+    $("orbPreview").style.background=isRainbow(n)?RB_CSS:orbBg(rainColor(n,RAINBOW[6]).c);
+  });
+  buildSwatches("auraSwatches","aura",function(n){
+    $("auraPreview").style.boxShadow=isRainbow(n)?
+      "0 0 18px 4px rgba(255,59,48,.55), 0 0 36px 9px rgba(255,204,0,.45), 0 0 54px 14px rgba(10,132,255,.45)":
+      "0 0 46px 14px "+rgba(rainColor(n,RAINBOW[4]).c,0.55);
   });
   $("orbPreview").style.background=orbBg("#ff375f");
   // option cards
@@ -1309,8 +1355,10 @@ function goStep(n){
     // aura step preview: current orb body + current aura glow
     var oc=rainColor(wiz.orb,RAINBOW[6]), ac=rainColor(wiz.aura,RAINBOW[4]);
     var ap=$("auraPreview");
-    ap.style.background=orbBg(oc.c);
-    ap.style.boxShadow="0 0 46px 14px "+rgba(ac.c,0.55);
+    ap.style.background=isRainbow(wiz.orb)?RB_CSS:orbBg(oc.c);
+    ap.style.boxShadow=isRainbow(wiz.aura)?
+      "0 0 18px 4px rgba(255,59,48,.55), 0 0 36px 9px rgba(255,204,0,.45), 0 0 54px 14px rgba(10,132,255,.45)":
+      "0 0 46px 14px "+rgba(ac.c,0.55);
   }
 }
 
@@ -3021,17 +3069,21 @@ var themeTmp=null;
 function buildThemeSwatches(){
   function row(elId,key){
     var box=$(elId); box.innerHTML="";
+    function sel(name, el){
+      themeTmp[key]=name;
+      var kids=box.children;
+      for(var k=0;k<kids.length;k++) kids[k].classList.remove("sel");
+      el.classList.add("sel");
+    }
     RAINBOW.forEach(function(r){
       var d=document.createElement("div");
       d.className="sw"+(themeTmp[key]===r.n?" sel":"");
       d.title=r.n; d.style.background=r.c;
-      d.onclick=function(){
-        themeTmp[key]=r.n;
-        var kids=box.children;
-        for(var k=0;k<kids.length;k++) kids[k].classList.remove("sel");
-        d.classList.add("sel");
-      };
+      d.onclick=function(){ sel(r.n, d); };
       box.appendChild(d);
+    });
+    appendRainbowSwatch(box, themeTmp[key]==="rainbow", function(name){
+      themeTmp[key]=name;
     });
   }
   row("setWall","wallpaper"); row("setOrb","orb"); row("setAura","aura");
@@ -3171,27 +3223,34 @@ function applyTheme(st){
   var w=rainColor(st.wallpaper,RAINBOW[4]);
   var o=rainColor(st.orb,RAINBOW[6]);
   var a=rainColor(st.aura,o);
+  var wRain=isRainbow(st.wallpaper), oRain=isRainbow(st.orb), aRain=isRainbow(st.aura);
   // the whole wallpaper is the chosen color, fading around the edges —
   // dark wallpapers fade to black, light ones fade to white
-  var edge=wallLum(w.c)>0.6?"#ffffff":"#000000";
-  document.body.style.background =
+  var wLum=wRain?0.45:wallLum(w.c);
+  var edge=wLum>0.6?"#ffffff":"#000000";
+  document.body.style.background = wRain ? RB_CSS :
     "radial-gradient(125% 125% at 50% 40%, "+w.c+" 0%, "+w.c+" 42%, "+edge+" 100%)";
   // light wallpapers get dark HUD text so everything stays readable
-  document.body.classList.toggle("light-wall", wallLum(w.c)>0.6);
+  document.body.classList.toggle("light-wall", wLum>0.6);
   var orb=$("orb");
-  orb.style.background =
+  orb.style.background = oRain ? RB_CSS :
     "radial-gradient(circle at 35% 30%, "+rgba(o.c,0.95)+", "+o.c+" 55%, "+rgba(o.c,0.5)+")";
   // thin outline so the orb stays visible when wallpaper/orb are the same color:
   // white on black wallpaper, black on everything else
   var outlineC=(st.wallpaper==="black")?"rgba(255,255,255,0.55)":"rgba(0,0,0,0.45)";
   orb.style.border="1.5px solid "+outlineC;
   // the aura is its own selectable glow around the orb
-  orb.style.boxShadow="0 0 46px 12px "+rgba(a.c,0.4);
+  var auraShadow=aRain ?
+    "0 0 18px 4px rgba(255,59,48,.55), 0 0 36px 9px rgba(255,204,0,.45), 0 0 54px 14px rgba(10,132,255,.45)" :
+    "0 0 46px 12px "+rgba(a.c,0.4);
+  orb.style.boxShadow=auraShadow;
   var gs=$("orbGlowStyle");
   if(!gs){ gs=document.createElement("style"); gs.id="orbGlowStyle"; document.head.appendChild(gs); }
-  gs.textContent="#orb.talking{box-shadow:0 0 100px 30px "+rgba(a.c,0.8)+" !important;}";
+  gs.textContent="#orb.talking{box-shadow:"+(aRain ?
+    "0 0 40px 12px rgba(255,59,48,.8), 0 0 80px 24px rgba(255,204,0,.6), 0 0 120px 36px rgba(10,132,255,.6)" :
+    "0 0 100px 30px "+rgba(a.c,0.8))+" !important;}";
   var op=$("orbPreview");
-  if(op) op.style.background=orbBg(o.c);
+  if(op) op.style.background=oRain?RB_CSS:orbBg(o.c);
 }
 function startHud(st, sayHi){
   S.name=st.name; S.wake=st.wake||"hey"; S.voice=st.voice; S.pers=st.pers;
