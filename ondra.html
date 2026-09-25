@@ -1192,12 +1192,14 @@ function tabIconSVG(iconName, outlineName, fgName, size){
     if(n==="clear") return "none";
     return rainColor(n, RAINBOW[8]).c;
   }
-  // the Ondra O is a thin ring — it gets a hairline edge so the band stays thin
+  // the Ondra O is a thin ring — it gets a hairline edge so the band stays thin,
+  // and it's drawn bigger so it fills the tab
   var sw = (iconName==="o") ? 0.9 : 2.4;
+  var tf = (iconName==="o") ? "translate(3,3) scale(2.4167)" : "translate(6,6) scale(2.1667)";
   // transparent background — the icon itself carries the outline; drawn large
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="'+size+'" height="'+size+'">'
     + defs
-    + '<g transform="translate(6,6) scale(2.1667)" fill="'+tc(fgName)+'" stroke="'+tc(outlineName)+'" stroke-width="'+sw+'" stroke-linejoin="round">'
+    + '<g transform="'+tf+'" fill="'+tc(fgName)+'" stroke="'+tc(outlineName)+'" stroke-width="'+sw+'" stroke-linejoin="round">'
     + '<path d="'+ic.path+'"'+rule+'/></g></svg>';
 }
 function setFavicon(url){
