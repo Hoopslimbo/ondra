@@ -1592,9 +1592,27 @@ function cleanForSpeech(t){
 function speak(text, onStart, onDone, voice, prosody){
   text=cleanForSpeech(text); // what it says out loud — never emojis/_/-// junk
   var my = ++speakToken;
-  var started=false;
+  var started=false, doneFired=false;
   function fireStart(){ if(started||my!==speakToken) return; started=true; if(onStart){ try{onStart();}catch(e){} } }
-  function fireDone(){ if(my!==speakToken) return; if(onDone){ try{onDone();}catch(e){} } }
+  function fireDone(){ if(doneFired||my!==speakToken) return; doneFired=true; if(onDone){ try{onDone();}catch(e){} } }
+  /* Watchdog: if the audio dies silently (stalled stream, speechSynthesis
+     silent failure), the mic must not stay trapped "speaking" forever.
+     Only releases when nothing is actually playing. */
+  (function(){
+    var tries=0;
+    function watch(){
+      if(doneFired||my!==speakToken) return;
+      if(!started){ setTimeout(watch,3000); return; }
+      var busy=false;
+      try{
+        if(typeof netAudio!=="undefined"&&netAudio&&!netAudio.paused&&!netAudio.ended) busy=true;
+        if(window.speechSynthesis&&(speechSynthesis.speaking||speechSynthesis.pending)) busy=true;
+      }catch(e){}
+      if(!busy||++tries>36){ fireDone(); return; }
+      setTimeout(watch,5000);
+    }
+    setTimeout(watch,10000);
+  })();
   if(S.voiceMuted){
     // Voice muted: no audio at all, but the conversation flow (UI state,
     // follow-up windows, counters) moves exactly as if it had spoken.
