@@ -1853,10 +1853,16 @@ function startListening(quiet){
     recog.continuous=true; recog.interimResults=true; recog.lang="en-US";
     micWanted=true; micRestarts=0;
     recog.onresult=function(ev){
-      var fin="";
+      var fin="", heard=false;
       for(var i=ev.resultIndex;i<ev.results.length;i++){
+        var tr=ev.results[i][0]&&ev.results[i][0].transcript;
+        if(tr&&String(tr).trim()) heard=true;
         if(ev.results[i].isFinal) fin+=ev.results[i][0].transcript+" ";
       }
+      // The user is actively talking inside the follow-up window: keep the
+      // window open so it can't expire mid-utterance. Never reopens an
+      // expired window — without the wake word, stray noise stays ignored.
+      if(heard && !speaking && Date.now()<followUpUntil) followUpUntil=Date.now()+8000;
       fin=fin.trim();
       if(!fin) return;
       var a=voiceAction(fin, S.name, Date.now()<followUpUntil, speaking);
