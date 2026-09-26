@@ -4,7 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ondra</title>
-<!-- GCAI DEMO v34.9 — 2026-09-26: Settings shows a live mic/audio mute status
+<!-- ONDRA v35.0 — 2026-09-26: honest event-driven mic status (Settings can never
+     show Mic off while the mic is on; auto-restarts with backoff); wake and
+     question follow-up dings respect Audio off; Settings voice toggle and the
+     edge voice button now stay in sync; rotating segmented rainbow aura;
+     duplicate circle tab icon removed; transfer codes now use the ONDRA- prefix.
+     v34.9 — 2026-09-26: Settings shows a live mic/audio mute status
      indicator; fixed the Linked Accounts Connect button (an old "coming soon"
      placeholder was overriding the real Google OAuth handler).
      v34.8 — 2026-09-25: built-in local calendar (no Google account needed,
@@ -300,6 +305,19 @@
            position:relative; z-index:5; min-height:0; }
   #orb { width:170px; height:170px; border-radius:50%; position:relative;
          animation:orbPulse 3.2s ease-in-out infinite; transition:box-shadow .3s ease; }
+  /* Rotating segmented rainbow aura: hard angular color sections on a ring
+     behind the orb, spinning continuously. Only ever added for the "rainbow"
+     aura — solid-color auras keep using box-shadow. */
+  .rainbow-aura { position:relative; }
+  .rainbow-aura::before{
+    content:""; position:absolute; inset:-26px; border-radius:50%;
+    background:conic-gradient(from 0deg,#ff3b30 0deg 51.4deg,#ff9500 51.4deg 102.9deg,#ffcc00 102.9deg 154.3deg,#34c759 154.3deg 205.7deg,#0a84ff 205.7deg 257.1deg,#bf5af2 257.1deg 308.6deg,#ff375f 308.6deg 360deg);
+    -webkit-mask:radial-gradient(closest-side, transparent 60%, #000 76%);
+    mask:radial-gradient(closest-side, transparent 60%, #000 76%);
+    filter:blur(5px); opacity:.9; z-index:-1; pointer-events:none;
+    animation:auraSpin 10s linear infinite;
+  }
+  @keyframes auraSpin{ to{ transform:rotate(360deg); } }
   #orb.pulseOnce { animation:orbPop .55s ease-out; }
   @keyframes orbPop { 0% { transform:scale(1); } 35% { transform:scale(1.12); } 100% { transform:scale(1); } }
   #orb.talking { animation:orbTalk .5s ease-in-out infinite; }
@@ -440,7 +458,7 @@
   #docEditBar button:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(0,0,0,.3); }
   #docSave:hover { border-color:#34c759; color:#34c759; }
   #docScrap:hover { border-color:#ff6b6b; color:#ff6b6b; }
-  #docEditArea { width:100%; min-height:300px; box-sizing:border-box;
+  #docEditArea { width:100%; min-height:430px; box-sizing:border-box;
            background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.16);
            border-radius:16px; color:#eef1f6; font-size:14px; line-height:1.7;
            padding:14px 16px; resize:vertical; font-family:inherit;
@@ -1042,13 +1060,6 @@
     <h2>Linked Accounts</h2>
     <p class="sub">Connect your accounts so I can act on them.</p>
     <div id="linksList">
-      <div class="link-row">
-        <div class="link-info">
-          <div class="link-name">Google</div>
-          <div class="link-desc">Gmail, Calendar, and more</div>
-        </div>
-        <button class="btn" id="linkGoogle">Connect</button>
-      </div>
     </div>
     <button class="btn ghost" id="linksClose">Close</button>
   </div>
@@ -1224,7 +1235,6 @@ var TAB_ICONS = [
   {n:"chat", label:"Chat", path:"M3 4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-6 5V4z"},
   {n:"star", label:"Star", path:"M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8L12 2z"},
   {n:"moon", label:"Moon", path:"M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"},
-  {n:"orb", label:"Orb", path:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"},
   {n:"diamond", label:"Diamond", path:"M12 2L2 9l10 13L22 9 12 2z"},
   {n:"crown", label:"Crown", path:"M2 8l4 3.5L12 5l6 6.5L22 8l-2 11H4L2 8z"},
   {n:"ghost", label:"Ghost", path:"M12 2a7 7 0 0 0-7 7v10l2.5-2.5L10 19l2-2.5L14 19l2.5-2.5L19 19V9a7 7 0 0 0-7-7z"},
@@ -1236,16 +1246,21 @@ var TAB_ICONS = [
   {n:"rocket", label:"Rocket", path:"M12 2c4 3 6 7 6 11l3 4-4 1c-1 2-3 3.6-5 4.2-2-.6-4-2.2-5-4.2l-4-1 3-4c0-4 2-8 6-11z"},
   {n:"paw", label:"Paw", path:"M12 12.5c-3 0-5.5 2.2-5.5 4.5 0 1.5 1.2 2.5 2.8 2.5 1 0 1.8-.4 2.7-.4s1.7.4 2.7.4c1.6 0 2.8-1 2.8-2.5 0-2.3-2.5-4.5-5.5-4.5zM6.2 7.4a1.7 1.7 0 1 0 3.4 0 1.7 1.7 0 1 0-3.4 0zM9.8 4.6a1.7 1.7 0 1 0 3.4 0 1.7 1.7 0 1 0-3.4 0zM14.2 4.6a1.7 1.7 0 1 0 3.4 0 1.7 1.7 0 1 0-3.4 0zM17.8 7.4a1.7 1.7 0 1 0 3.4 0 1.7 1.7 0 1 0-3.4 0z"}
 ];
+/* unique gradient id per render: two steppers (wizard + Customization) live in the
+   same document, and url(#id) resolves to the FIRST matching id — which can sit
+   inside a display:none screen and then paint nothing. */
+var tirbSeq=0;
 function tabIconSVG(iconName, outlineName, fgName, size){
   var ic = TAB_ICONS.filter(function(t){ return t.n===iconName; })[0] || TAB_ICONS[0];
   var rule = ic.rule ? ' fill-rule="'+ic.rule+'"' : '';
   // resolve colors: rainbow -> svg gradient, clear -> none, else hex
   var needRb = isRainbow(outlineName)||isRainbow(fgName);
-  var defs = needRb ? '<defs><linearGradient id="tirb" x1="0" y1="0" x2="1" y2="1">' +
+  var gid = "tirb"+(++tirbSeq);
+  var defs = needRb ? '<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="1" y2="1">' +
     RB_STOPS.map(function(s){ return '<stop offset="'+s[0]+'" stop-color="'+s[1]+'"/>'; }).join("") +
     '</linearGradient></defs>' : '';
   function tc(n){
-    if(isRainbow(n)) return "url(#tirb)";
+    if(isRainbow(n)) return "url(#"+gid+")";
     if(n==="clear") return "none";
     return rainColor(n, RAINBOW[8]).c;
   }
@@ -1391,9 +1406,9 @@ function startWizard(){
     $("orbPreview").style.background=isRainbow(n)?RB_CONIC:orbBg(rainColor(n,RAINBOW[6]).c);
   });
   buildSwatches("auraSwatches","aura",function(n){
-    $("auraPreview").style.boxShadow=isRainbow(n)?
-      "0 0 18px 4px rgba(255,59,48,.55), 0 0 36px 9px rgba(255,204,0,.45), 0 0 54px 14px rgba(10,132,255,.45)":
-      "0 0 46px 14px "+rgba(rainColor(n,RAINBOW[4]).c,0.55);
+    var apw=$("auraPreview"), rb=isRainbow(n);
+    apw.classList.toggle("rainbow-aura", rb);
+    apw.style.boxShadow=rb?"":"0 0 46px 14px "+rgba(rainColor(n,RAINBOW[4]).c,0.55);
   });
   $("orbPreview").style.background=orbBg("#ff375f");
   // option cards
@@ -1458,9 +1473,8 @@ function goStep(n){
     var oc=rainColor(wiz.orb,RAINBOW[6]), ac=rainColor(wiz.aura,RAINBOW[4]);
     var ap=$("auraPreview");
     ap.style.background=isRainbow(wiz.orb)?RB_CONIC:orbBg(oc.c);
-    ap.style.boxShadow=isRainbow(wiz.aura)?
-      "0 0 18px 4px rgba(255,59,48,.55), 0 0 36px 9px rgba(255,204,0,.45), 0 0 54px 14px rgba(10,132,255,.45)":
-      "0 0 46px 14px "+rgba(ac.c,0.55);
+    ap.classList.toggle("rainbow-aura", isRainbow(wiz.aura));
+    ap.style.boxShadow=isRainbow(wiz.aura)?"":"0 0 46px 14px "+rgba(ac.c,0.55);
   }
 }
 
@@ -1725,7 +1739,7 @@ function pulseOrb(){
   setTimeout(function(){ orb.classList.remove("pulseOnce"); },600);
 }
 var SR = window.SpeechRecognition || window.webkitSpeechRecognition || null;
-var recog=null, micOn=false, speaking=false, followUpUntil=0;
+var recog=null, micWanted=false, micLive=false, micRestarts=0, speaking=false, followUpUntil=0;
 function editDist(a,b){
   // tiny Levenshtein for the wake-word smear fallback below
   a=String(a); b=String(b);
@@ -1788,8 +1802,29 @@ function voiceAction(fin, name, followUp, isSpeaking){
   if(followUp && fin.trim()) return {type:"send", query:fin.trim()};
   return {type:"ignore"}; // no wake word: not for us
 }
+/* Mic state is event-driven and honest: micWanted = the user wants the mic on
+   (intent); micLive = recognition is actually running right now (from the
+   browser's own onstart/onend events). The mic button and the Settings status
+   line both follow micLive, so they can never claim a state that isn't real. */
+function setMicLive(on){
+  micLive=!!on;
+  var mb=$("micBtn"); if(mb) mb.classList.toggle("live", micLive);
+  if(typeof updateSetStatus==="function") updateSetStatus();
+}
+function scheduleMicRestart(){
+  // Chrome ends recognition on its own (pauses, hiccups) — restart with
+  // backoff. After repeated failures, admit it instead of pretending.
+  micRestarts++;
+  if(micRestarts>5 || !micWanted){
+    micWanted=false; setMicLive(false);
+    if(micRestarts>5) flashHint("The mic stopped responding — tap the mic button to restart it.");
+    return;
+  }
+  var r=recog;
+  setTimeout(function(){ if(!micWanted||recog!==r) return; try{ r.start(); }catch(e){ scheduleMicRestart(); } }, 350*micRestarts);
+}
 function startListening(quiet){
-  if(micOn) return;
+  if(micWanted) return;
   if(!SR){
     // iOS Safari/Chrome/Firefox don't implement speech recognition at all —
     // say so instead of leaving the mic button looking dead.
@@ -1800,6 +1835,7 @@ function startListening(quiet){
   try{
     recog=new SR();
     recog.continuous=true; recog.interimResults=true; recog.lang="en-US";
+    micWanted=true; micRestarts=0;
     recog.onresult=function(ev){
       var fin="";
       for(var i=ev.resultIndex;i<ev.results.length;i++){
@@ -1812,29 +1848,30 @@ function startListening(quiet){
       else if(a.type==="ack") ackWake();
       else if(a.type==="stop") stopTalking(); // name said mid-speech: stop talking
     };
-    recog.onend=function(){ if(micOn){ try{recog.start();}catch(e){} } };
+    recog.onstart=function(){ micRestarts=0; setMicLive(true); };
+    recog.onend=function(){ setMicLive(false); if(micWanted) scheduleMicRestart(); };
     recog.onerror=function(ev){
       var err=(ev&&ev.error)||"unknown";
       // Windows: "audio-capture" usually means the OS blocked Chrome's mic
       // (Settings > Privacy & security > Microphone > "Let desktop apps
       // access your microphone" must be ON) or no mic is plugged in.
       if(err==="audio-capture"){
-        stopMic();
+        micWanted=false; setMicLive(false); try{ if(recog) recog.stop(); }catch(e){}
         flashHint("No mic signal — on Windows check Settings > Privacy > Microphone and turn on mic access for desktop apps.");
       }else if(err==="not-allowed"||err==="service-not-allowed"){
-        stopMic();
+        micWanted=false; setMicLive(false); try{ if(recog) recog.stop(); }catch(e){}
         flashHint("Mic was blocked — click the mic icon in the address bar, allow it, then tap the mic button again.");
       }else if(err==="network"){
         flashHint("Mic needs internet for speech recognition — check your connection.");
       }
-      /* "no-speech" and "aborted" are normal; stay listening. */
+      /* "no-speech" and "aborted" just end the segment; onend restarts. */
     };
-    recog.start(); micOn=true; var mb=$("micBtn"); if(mb) mb.classList.add("live");
+    recog.start();
     flashHint('Listening — say "Hey '+S.name+'" or just "'+S.name+'".');
-  }catch(e){ flashHint("Couldn't start the mic — type instead."); }
+  }catch(e){ micWanted=false; flashHint("Couldn't start the mic — type instead."); }
 }
-function toggleMic(){ if(micOn) stopMic(); else startListening(false); }
-function stopMic(){ micOn=false; try{ if(recog) recog.stop(); }catch(e){} var mb=$("micBtn"); if(mb) mb.classList.remove("live"); }
+function toggleMic(){ if(micWanted) stopMic(); else startListening(false); }
+function stopMic(){ micWanted=false; setMicLive(false); try{ if(recog) recog.stop(); }catch(e){} }
 var lastAckWake=0;
 function ackWake(){
   // debounce: Chrome sometimes fires duplicate final transcripts for one
@@ -1857,7 +1894,7 @@ function ackWake(){
   orb.classList.add("talking");
   $("subtitle").textContent="Yes?";
   flashHint("I'm listening — go ahead.");
-  playDing(S.ding);
+  if(!S.voiceMuted) playDing(S.ding); // Audio off silences the wake ding too
   setTimeout(function(){ orb.classList.remove("talking"); setWakeHint(); }, 900);
   followUpUntil=Date.now()+8000;
 }
@@ -2064,9 +2101,16 @@ var notes=[]; // {id, title, text, ts}
 var curNoteId=null;
 try{ notes=JSON.parse(localStorage.getItem("ondra_notes")||"[]"); }catch(e){ notes=[]; }
 function saveNotes(){ try{ localStorage.setItem("ondra_notes", JSON.stringify(notes)); }catch(e){} }
+/* strip markdown the brain sometimes adds (**bold**, # headers, etc.) for on-screen text */
+function stripMd(t){
+  return String(t||"").replace(/\*\*(.+?)\*\*/g,"$1").replace(/__(.+?)__/g,"$1")
+    .replace(/(^|\s)\*(.+?)\*/g,"$1$2").replace(/(^|\s)_([^_]+?)_/g,"$1$2")
+    .replace(/^#{1,4}\s+/gm,"").replace(/`(.+?)`/g,"$1").trim();
+}
 function openDoc(title, text){
+  text=stripMd(text);
   $("docTitle").textContent=title||"Document";
-  $("docBody").textContent=text||"";
+  $("docBody").textContent=text;
   $("docBody").style.display="";
   var ea=$("docEditArea"); if(ea) ea.remove();
   $("docEditBar").classList.add("hidden");
@@ -2225,7 +2269,7 @@ function linkGoogle(){
     client.requestAccessToken({prompt:"consent"});
   }catch(e){ say("Couldn't start Google sign-in. Try again."); }
 }
-$("linkGoogle").onclick=function(){ linkGoogle(); };
+if($("linkGoogle")) $("linkGoogle").onclick=function(){ linkGoogle(); };
 
 function calApi(path, method, body){
   return fetch("https://www.googleapis.com/calendar/v3"+path, {
@@ -2419,7 +2463,7 @@ $("settingsClose").onclick=function(){ hide("settingsModal"); };
 $("settingsModal").onclick=function(e){ if(e.target===$("settingsModal")) hide("settingsModal"); };
 function updateSetStatus(){
   var el=$("setStatus"); if(!el) return;
-  var mic=!!micOn, aud=!S.voiceMuted;
+  var mic=!!micLive, aud=!S.voiceMuted;
   el.innerHTML='<span class="'+(mic?"on":"off")+'">Mic '+(mic?"on":"off")+'</span> · '+
                '<span class="'+(aud?"on":"off")+'">Audio '+(aud?"on":"off")+'</span>';
 }
@@ -2431,7 +2475,7 @@ $("setVoice").onclick=function(){
     stopNetAudio();
   }
   var st=settings()||{}; st.voiceMuted=S.voiceMuted; saveSettings(st);
-  updateSetStatus();
+  updateSetStatus(); updateVoiceBtn();
 };
 $("menuCustom").onclick=function(){
   closeMenu();
@@ -3106,9 +3150,7 @@ function say(text, brain, prosody){
   var orb=$("orb");
   $("brainTag").textContent = brain ? "via "+brain : "";
   // on-screen text: strip markdown the brain sometimes adds (**bold**, # headers, etc.)
-  var display=text.replace(/\*\*(.+?)\*\*/g,"$1").replace(/__(.+?)__/g,"$1")
-    .replace(/(^|\s)\*(.+?)\*/g,"$1$2").replace(/(^|\s)_([^_]+?)_/g,"$1$2")
-    .replace(/^#{1,4}\s+/gm,"").replace(/`(.+?)`/g,"$1").trim();
+  var display=stripMd(text);
   speak(text,
     function(){ // audio started: glow + words together
       speaking=true;
@@ -3125,7 +3167,7 @@ function say(text, brain, prosody){
       // Question follow-up: if the reply contains a question mark anywhere,
       // ding and open a 3s no-wake-word window so the user can answer
       // directly — then reset.
-      if(/\?/.test(stripEmojis(text))){
+      if(!S.voiceMuted && /\?/.test(stripEmojis(text))){
         playDing(S.ding);
         followUpUntil=Date.now()+8000;
         flashHint("I'm listening — go ahead.");
@@ -3285,7 +3327,10 @@ function genCode(st){
     for(var i=0;i<4;i++){ s+=A.charAt(h%A.length); h=Math.floor(h/A.length); }
     return s;
   }
-  return "GCAI-"+grp(base)+"-"+grp(base+"#2");
+  /* NOTE: demo transfer codes issued before the 2026-09-26 rename carry a
+     "GCAI-" prefix. When transfer-code redemption is built, accept BOTH
+     "ONDRA-" and "GCAI-" prefixes so those early codes still work. */
+  return "ONDRA-"+grp(base)+"-"+grp(base+"#2");
 }
 /* ================= WAITLIST =================
    Pre-launch: dismissible popup once at 15 requests left; when requests run
@@ -3316,7 +3361,7 @@ function fbSend(){
   $("fbErr").textContent="";
   var p=new URLSearchParams();
   p.append(FB_ENTRY_TYPE, fbType());
-  p.append(FB_ENTRY_DETAILS, msg+"\n\n— sent from Ondra Demo "+FB_VERSION);
+  p.append(FB_ENTRY_DETAILS, msg+"\n\n— sent from Ondra "+FB_VERSION);
   try{
     fetch(FB_FORM_URL,{method:"POST",mode:"no-cors",
       headers:{"Content-Type":"application/x-www-form-urlencoded"},body:p.toString()});
@@ -3372,11 +3417,10 @@ function applyTheme(st){
   // white on black wallpaper, black on everything else
   var outlineC=(st.wallpaper==="black")?"rgba(255,255,255,0.55)":"rgba(0,0,0,0.45)";
   orb.style.border="1.5px solid "+outlineC;
-  // the aura is its own selectable glow around the orb
-  var auraShadow=aRain ?
-    "0 0 18px 4px rgba(255,59,48,.55), 0 0 36px 9px rgba(255,204,0,.45), 0 0 54px 14px rgba(10,132,255,.45)" :
-    "0 0 46px 12px "+rgba(a.c,0.4);
-  orb.style.boxShadow=auraShadow;
+  // the aura is its own selectable glow around the orb:
+  // rainbow = rotating segmented ring (CSS class); solid = box-shadow
+  orb.classList.toggle("rainbow-aura", aRain);
+  orb.style.boxShadow=aRain ? "" : "0 0 46px 12px "+rgba(a.c,0.4);
   var gs=$("orbGlowStyle");
   if(!gs){ gs=document.createElement("style"); gs.id="orbGlowStyle"; document.head.appendChild(gs); }
   gs.textContent="#orb.talking{box-shadow:"+(aRain ?
@@ -3395,7 +3439,7 @@ function startHud(st, sayHi){
   applyTabIcon();
   $("hudName").textContent=st.name;
   document.title=st.name; // tab shows their AI's name once it's made
-  $("hudSub").textContent="Ondra Demo · "+st.pers;
+  $("hudSub").textContent="Ondra · "+st.pers;
   setWakeHint();
    
   show("hud");
@@ -3419,7 +3463,7 @@ var vb2=$("voiceMuteBtn"); if(vb2) vb2.onclick=function(){
     stopNetAudio();
   }
   var st=settings()||{}; st.voiceMuted=S.voiceMuted; saveSettings(st);
-  updateVoiceBtn();
+  updateVoiceBtn(); updateSetStatus();
 };
 updateVoiceBtn();
 $("sendBtn").onclick=function(){ var v=$("q").value; $("q").value=""; sendMessage(v); };
