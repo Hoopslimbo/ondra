@@ -4,7 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ondra</title>
-<!-- ONDRA v35.1 — 2026-09-26: Memory — rail brain button replaces Linked Accounts;
+<!-- ONDRA v35.2 — 2026-09-26: retro memory-wipe animation — "Forget everything"
+     plays a backwards retro loading bar draining 100% -> 0%, flashes "MEMORY WIPED!",
+     then closes. The wipe itself lands exactly at 0%.
+     ONDRA v35.1 — 2026-09-26: Memory — rail brain button replaces Linked Accounts;
      "what do you remember about me" opens the viewer silently (free);
      personal facts auto-saved on-device, X to forget each, 2-month rolling expiry;
      stored memories feed the brain so Ondra actually uses them.
@@ -533,6 +536,22 @@
   .mem-item .mem-del:hover { background:rgba(255,107,107,.2); color:#ff5555; border-color:#ff6b6b; }
   #memoryFoot { margin-top:14px; color:#8a93a6; font-size:12px; text-align:center; }
   #memoryClearAll { background:none; border:none; color:#8ab4ff; font-size:12px; cursor:pointer; text-decoration:underline; padding:0; }
+  /* retro memory-wipe animation */
+  #wipeOverlay { position:fixed; inset:0; z-index:120; display:flex; align-items:center; justify-content:center;
+           background:rgba(0,0,0,.72); }
+  #wipeOverlay[hidden] { display:none; }
+  .wipe-box { position:relative; background:#0b0e0b; border:3px solid #33ff66; border-radius:6px; padding:26px 34px;
+           text-align:center; box-shadow:0 0 24px rgba(51,255,102,.35), inset 0 0 18px rgba(51,255,102,.08);
+           font-family:"Courier New", ui-monospace, SFMono-Regular, monospace; color:#33ff66;
+           text-shadow:0 0 6px rgba(51,255,102,.8); overflow:hidden; }
+  .wipe-box::after { content:""; position:absolute; inset:0; pointer-events:none;
+           background:repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 2px, transparent 2px 4px); }
+  .wipe-title { font-size:15px; letter-spacing:2px; margin-bottom:16px; }
+  .wipe-bar { font-size:22px; letter-spacing:2px; white-space:pre; }
+  .wipe-pct { font-size:26px; margin-top:10px; letter-spacing:3px; }
+  .wipe-done { font-size:24px; letter-spacing:3px; margin-top:14px; animation:wipeBlink .5s steps(2) infinite; }
+  .wipe-done[hidden] { display:none; }
+  @keyframes wipeBlink { 50% { opacity:.25; } }
   /* email composer */
   #emailWin { position:fixed; left:75%; top:50%; transform:translate(-50%,-50%); width:480px; max-width:calc(100vw - 36px);
            max-height:80vh; overflow:hidden; display:flex; flex-direction:column; z-index:80; border-radius:24px;
@@ -1004,6 +1023,15 @@
     <div class="popup-head"><span class="tip">Memory</span><div><button id="memoryClose" data-tip="Close" aria-label="close">✕</button></div></div>
     <div id="memoryList"></div>
     <div id="memoryFoot">Memories fade after 2 months unless you bring them up again. <button id="memoryClearAll">Forget everything</button></div>
+  </div>
+  <!-- 4d3. RETRO MEMORY WIPE -->
+  <div id="wipeOverlay" hidden>
+    <div class="wipe-box">
+      <div class="wipe-title">WIPING MEMORY</div>
+      <div class="wipe-bar" id="wipeBar"></div>
+      <div class="wipe-pct" id="wipePct">100%</div>
+      <div class="wipe-done" id="wipeDone" hidden>MEMORY WIPED!</div>
+    </div>
   </div>
   <!-- 4e. EMAIL COMPOSER (LUNA-style guided flow: To -> what's it about -> draft -> review) -->
   <div id="emailWin" class="hidden">
@@ -2610,8 +2638,33 @@ function openMemory(){
   show("memoryModal");
 }
 $("memoryClose").onclick=function(){ hide("memoryModal"); };
-$("memoryClearAll").onclick=function(){ userMemories=[]; saveMemories(); openMemory(); };
+$("memoryClearAll").onclick=function(){ wipeAllMemories(); };
 $("memoryModal").onclick=function(e){ if(e.target===$("memoryModal")) hide("memoryModal"); };
+var wipeTimer=null;
+function renderWipe(pct){
+  var segs=24, filled=Math.round(pct/100*segs), bar="";
+  for(var i=0;i<filled;i++) bar+="\u2588";
+  for(var i=filled;i<segs;i++) bar+="\u2591";
+  $("wipeBar").textContent="["+bar+"]";
+  $("wipePct").textContent=pct+"%";
+}
+function wipeAllMemories(){
+  if(wipeTimer) return;
+  $("wipeDone").hidden=true;
+  var pct=100;
+  renderWipe(pct);
+  $("wipeOverlay").hidden=false;
+  wipeTimer=setInterval(function(){
+    pct-=Math.floor(Math.random()*6)+2;
+    if(pct<=0){ pct=0; clearInterval(wipeTimer); wipeTimer=null; renderWipe(0); finishWipe(); return; }
+    renderWipe(pct);
+  },80);
+}
+function finishWipe(){
+  userMemories=[]; saveMemories(); openMemory();
+  $("wipeDone").hidden=false;
+  setTimeout(function(){ $("wipeOverlay").hidden=true; $("wipeDone").hidden=true; },1500);
+}
 loadMemories();
 /* ================= GOOGLE LINK + BUILT-IN CALENDAR ================= */
 // Google OAuth client ID — created 2026-09-25 in Google Cloud Console
