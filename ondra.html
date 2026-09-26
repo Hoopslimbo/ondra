@@ -310,12 +310,12 @@
      aura — solid-color auras keep using box-shadow. */
   .rainbow-aura { position:relative; }
   .rainbow-aura::before{
-    content:""; position:absolute; inset:-22px; border-radius:50%;
-    background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cpath%20d%3D%22M50%2C50L25.0%2C93.3A50%2C50%200%200%201%2014.6%2C85.4Z%22%20fill%3D%22%23ff4a28%22%2F%3E%3Cpath%20d%3D%22M50%2C50L14.6%2C85.4A50%2C50%200%200%201%206.7%2C75.0Z%22%20fill%3D%22%23ff6818%22%2F%3E%3Cpath%20d%3D%22M50%2C50L6.7%2C75.0A50%2C50%200%200%201%201.7%2C62.9Z%22%20fill%3D%22%23ff8608%22%2F%3E%3Cpath%20d%3D%22M50%2C50L1.7%2C62.9A50%2C50%200%200%201%200.0%2C50.0Z%22%20fill%3D%22%23ff9e00%22%2F%3E%3Cpath%20d%3D%22M50%2C50L0.0%2C50.0A50%2C50%200%200%201%201.7%2C37.1Z%22%20fill%3D%22%23ffb000%22%2F%3E%3Cpath%20d%3D%22M50%2C50L1.7%2C37.1A50%2C50%200%200%201%206.7%2C25.0Z%22%20fill%3D%22%23ffc300%22%2F%3E%3Cpath%20d%3D%22M50%2C50L6.7%2C25.0A50%2C50%200%200%201%2014.6%2C14.6Z%22%20fill%3D%22%23ddcb0f%22%2F%3E%3Cpath%20d%3D%22M50%2C50L14.6%2C14.6A50%2C50%200%200%201%2025.0%2C6.7Z%22%20fill%3D%22%239aca2c%22%2F%3E%3Cpath%20d%3D%22M50%2C50L25.0%2C6.7A50%2C50%200%200%201%2037.1%2C1.7Z%22%20fill%3D%22%2356c84a%22%2F%3E%3Cpath%20d%3D%22M50%2C50L37.1%2C1.7A50%2C50%200%200%201%2050.0%2C0.0Z%22%20fill%3D%22%232dbc75%22%2F%3E%3Cpath%20d%3D%22M50%2C50L50.0%2C0.0A50%2C50%200%200%201%2062.9%2C1.7Z%22%20fill%3D%22%231fa6ac%22%2F%3E%3Cpath%20d%3D%22M50%2C50L62.9%2C1.7A50%2C50%200%200%201%2075.0%2C6.7Z%22%20fill%3D%22%23118fe3%22%2F%3E%3Cpath%20d%3D%22M50%2C50L75.0%2C6.7A50%2C50%200%200%201%2085.4%2C14.6Z%22%20fill%3D%22%23287dfd%22%2F%3E%3Cpath%20d%3D%22M50%2C50L85.4%2C14.6A50%2C50%200%200%201%2093.3%2C25.0Z%22%20fill%3D%22%23646ff8%22%2F%3E%3Cpath%20d%3D%22M50%2C50L93.3%2C25.0A50%2C50%200%200%201%2098.3%2C37.1Z%22%20fill%3D%22%23a161f4%22%2F%3E%3Cpath%20d%3D%22M50%2C50L98.3%2C37.1A50%2C50%200%200%201%20100.0%2C50.0Z%22%20fill%3D%22%23ca54da%22%2F%3E%3Cpath%20d%3D%22M50%2C50L100.0%2C50.0A50%2C50%200%200%201%2098.3%2C62.9Z%22%20fill%3D%22%23df48a8%22%2F%3E%3Cpath%20d%3D%22M50%2C50L98.3%2C62.9A50%2C50%200%200%201%2093.3%2C75.0Z%22%20fill%3D%22%23f43d78%22%2F%3E%3Cpath%20d%3D%22M50%2C50L93.3%2C75.0A50%2C50%200%200%201%2085.4%2C85.4Z%22%20fill%3D%22%23ff3857%22%2F%3E%3Cpath%20d%3D%22M50%2C50L85.4%2C85.4A50%2C50%200%200%201%2075.0%2C93.3Z%22%20fill%3D%22%23ff3948%22%2F%3E%3Cpath%20d%3D%22M50%2C50L75.0%2C93.3A50%2C50%200%200%201%2062.9%2C98.3Z%22%20fill%3D%22%23ff3a38%22%2F%3E%3Cpath%20d%3D%22M50%2C50L62.9%2C98.3A50%2C50%200%200%201%2050.0%2C100.0Z%22%20fill%3D%22%23ff3b30%22%2F%3E%3Cpath%20d%3D%22M50%2C50L50.0%2C100.0A50%2C50%200%200%201%2037.1%2C98.3Z%22%20fill%3D%22%23ff3b30%22%2F%3E%3Cpath%20d%3D%22M50%2C50L37.1%2C98.3A50%2C50%200%200%201%2025.0%2C93.3Z%22%20fill%3D%22%23ff3b30%22%2F%3E%3C%2Fsvg%3E") center/cover no-repeat;
-    -webkit-mask:radial-gradient(closest-side, transparent 84%, #000 88%, #000 94%, transparent 98%);
-    mask:radial-gradient(closest-side, transparent 84%, #000 88%, #000 94%, transparent 98%);
-    filter:blur(4px) saturate(1.25); opacity:.95; z-index:-1; pointer-events:none;
-    animation:auraSpin 6s linear infinite;
+    content:""; position:absolute; inset:-20px; border-radius:50%;
+    background:conic-gradient(from 0deg,#ff3b30,#ff9500,#ffcc00,#34c759,#0a84ff,#5e5cf2,#bf5af2,#ff3b30);
+    -webkit-mask:radial-gradient(closest-side, transparent 80%, #000 87%, transparent 100%);
+    mask:radial-gradient(closest-side, transparent 80%, #000 87%, transparent 100%);
+    filter:blur(14px) saturate(1.3); opacity:.9; z-index:-1; pointer-events:none;
+    animation:auraSpin 7s linear infinite;
   }
   @keyframes auraSpin{ to{ transform:rotate(360deg); } }
   #orb.pulseOnce { animation:orbPop .55s ease-out; }
@@ -1787,26 +1787,20 @@ function wakeMatch(transcript, name){
     var rest=t.replace(re," ").replace(/\s+/g," ").trim();
     return {hit:true, rest:rest};
   }
-  // Chrome often smears the wake word into one blob ("heylars") or
-  // mishears a letter ("heylarz"): accept a single word starting with
-  // "hey" whose remainder is within one edit of the name. Kept tight
-  // (hey-prefix required) so ordinary words never false-trigger.
+  // Fuzzy fallback: Chrome mishears unusual names ("honda", "andra",
+  // "onda", "on dra", "heyhonda" for "ondra"). Accept anything within a
+  // couple of edits of the name — but only for distinctive names (4+
+  // chars) so ordinary words never false-trigger the ding.
   var words=transcript.toLowerCase().replace(/[^a-z0-9\s]/g," ").split(/\s+/);
   var nmc=nm.replace(/\s+/g,"");
-  for(var i=0;i<words.length;i++){
-    var w=words[i];
-    if(w&&w.length>3&&w.indexOf("hey")===0&&editDist(w.slice(3),nmc)<=1)
-      return {hit:true, rest:words.slice(i+1).join(" ").trim()};
-  }
-  // Unusual names like "Ondra" get misheard ("andra", "honda", "on dra"):
-  // accept any single word within 1 edit of the name (2 edits for long names).
-  // Only when the name is distinctive (4+ chars) to avoid false triggers.
+  var maxEd=nmc.length>=5?2:1;
   if(nmc.length>=4){
-    var maxEd=nmc.length>=7?2:1;
-    for(var j=0;j<words.length;j++){
-      var w2=words[j];
-      if(w2&&w2.length>=3&&editDist(w2,nmc)<=maxEd)
-        return {hit:true, rest:words.slice(j+1).join(" ").trim()};
+    for(var i=0;i<words.length;i++){
+      var w=words[i]||"", w2=words[i+1]||"", cand=null, skip=1;
+      if(w.length>=3&&editDist(w,nmc)<=maxEd) cand=w;
+      else if(w.indexOf("hey")===0&&w.length>3&&editDist(w.slice(3),nmc)<=maxEd) cand=w;
+      else if(w2&&editDist(w+w2,nmc)<=1){ cand=w+w2; skip=2; }
+      if(cand) return {hit:true, rest:words.slice(i+skip).join(" ").trim()};
     }
   }
   return {hit:false, rest:transcript};
