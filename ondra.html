@@ -533,6 +533,25 @@
   #emailBar button:hover { transform:translateY(-1px); }
   #emailSend:hover { border-color:#34c759; color:#34c759; }
   #emailDiscard:hover { border-color:#ff6b6b; color:#ff6b6b; }
+  #emailHint { color:#8a93a6; font-size:13px; min-height:18px; }
+  #emailHint.err { color:#ff6b6b; }
+  #emailSubjectRow.hidden, #emailBody.hidden, #emailNext.hidden, #emailSend.hidden { display:none; }
+  #emailAboutWin { position:fixed; z-index:80; border-radius:18px; padding:14px 16px; animation:popIn .32s ease;
+           background:linear-gradient(160deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.03) 40%, rgba(255,255,255,0) 60%),
+             rgba(16,20,29,.58);
+           -webkit-backdrop-filter:blur(24px) saturate(1.7); backdrop-filter:blur(24px) saturate(1.7);
+           border:1px solid rgba(255,255,255,.2); box-shadow:0 16px 56px rgba(0,0,0,.5); }
+  #emailAboutWin.hidden { display:none; }
+  #emailAboutLabel { color:#8a93a6; font-size:11px; letter-spacing:2px; margin-bottom:8px; }
+  #emailAbout { width:100%; box-sizing:border-box; background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.16);
+           border-radius:12px; color:#eef1f6; font-size:14px; line-height:1.6;
+           padding:10px 12px; resize:vertical; font-family:inherit; }
+  #emailAbout:focus { outline:none; border-color:#8ab4ff; }
+  #emailAboutFoot { display:flex; justify-content:flex-end; margin-top:8px; }
+  #emailAboutGo { width:40px; height:40px; border-radius:50%; border:1px solid rgba(255,255,255,.18);
+           background:linear-gradient(160deg, rgba(255,255,255,.12), rgba(255,255,255,.04)); color:#eef1f6;
+           font-size:18px; cursor:pointer; }
+  #emailAboutGo:hover { border-color:#34c759; color:#34c759; }
   /* calendar */
   #calWin { position:fixed; right:18px; top:50%; transform:translateY(-50%); width:480px; max-width:calc(100vw - 36px);
            max-height:80vh; overflow:hidden; display:flex; flex-direction:column; z-index:80; border-radius:24px;
@@ -944,23 +963,30 @@
     <div class="popup-head"><span class="tip">Notepad</span><div><button id="noteAdd" data-tip="New note" aria-label="new note">+</button><button id="notepadClose" data-tip="Close" aria-label="close">✕</button></div></div>
     <div id="notepadList"></div>
   </div>
-  <!-- 4e. EMAIL COMPOSER -->
+  <!-- 4e. EMAIL COMPOSER (LUNA-style guided flow: To -> what's it about -> draft -> review) -->
   <div id="emailWin" class="hidden">
     <div class="doc-head">
-      <span id="emailTitle">New Email</span>
+      <span id="emailTitle">— New email</span>
       <div class="doc-actions">
         <button id="emailClose" data-tip="Close" aria-label="close">✕</button>
       </div>
     </div>
     <div id="emailFields">
-      <div class="email-row"><label>To</label><input id="emailTo" type="text" placeholder="name@example.com"></div>
-      <div class="email-row"><label>Subject</label><input id="emailSubject" type="text" placeholder="Subject"></div>
-      <textarea id="emailBody" placeholder="Write your email..."></textarea>
+      <div class="email-row" id="emailToRow"><label>To</label><input id="emailTo" type="text" placeholder="name@example.com" autocomplete="off"></div>
+      <div class="email-row hidden" id="emailSubjectRow"><label>Subject</label><input id="emailSubject" type="text" placeholder="Subject"></div>
+      <textarea id="emailBody" class="hidden" placeholder="Write your email..."></textarea>
+      <div id="emailHint"></div>
     </div>
     <div id="emailBar">
-      <button id="emailSend">Send</button>
+      <button id="emailNext">Next</button>
+      <button id="emailSend" class="hidden">Send</button>
       <button id="emailDiscard">Discard</button>
     </div>
+  </div>
+  <div id="emailAboutWin" class="hidden">
+    <div id="emailAboutLabel">WHAT'S IT ABOUT?</div>
+    <textarea id="emailAbout" rows="3" placeholder="e.g. thank my mom for dinner last night"></textarea>
+    <div id="emailAboutFoot"><button id="emailAboutGo" data-tip="Draft the email" aria-label="draft">✓</button></div>
   </div>
   <!-- 4f. CALENDAR -->
   <div id="calWin" class="hidden">
@@ -2106,65 +2132,211 @@ function isLongFormRequest(q){
   if(t.length>150&&/\b(essay|article)\b/.test(t)&&/\b(include|write|type|topics?|words?|paragraph)\b/.test(t)) return true;
   return false;
 }
-/* ================= EMAIL ================= */
+/* ================= EMAIL (LUNA-style guided composer) =================
+   "write an email" -> the window opens immediately -> To -> "what's it about?"
+   -> draft -> review. While the composer is open, everything said is about
+   the email: "send it" sends it through the mail app, "scrap it" discards,
+   "make it shorter" rewrites it, anything else edits the draft. */
+var emailState=null; // {step:"to"|"about"|"review", to:"", about:""}
+function emailOpen(){ return !!emailState && !$("emailWin").classList.contains("hidden"); }
+function closeEmail(){ hide("emailWin"); hide("emailAboutWin"); emailState=null; }
+function cleanSpokenEmail(t){
+  var s=" "+String(t||"").toLowerCase().trim()+" ";
+  s=s.replace(/\s+at\s+/g,"@").replace(/\s+dot\s+/g,".").replace(/[^a-z0-9@._%+\-]/g,"");
+  return s;
+}
+function placeEmailAbout(){
+  var r=$("emailWin").getBoundingClientRect(), a=$("emailAboutWin");
+  a.style.width=Math.max(220,Math.min(400,r.width-28))+"px";
+  a.style.left=(r.left+14)+"px";
+  a.style.top=(r.bottom-3)+"px";
+}
+function emailStep(step){
+  var M=emailState; if(!M) return;
+  M.step=step;
+  $("emailSubjectRow").classList.toggle("hidden",step!=="review");
+  $("emailBody").classList.toggle("hidden",step!=="review");
+  $("emailNext").classList.toggle("hidden",step!=="to");
+  $("emailSend").classList.toggle("hidden",step!=="review");
+  var about=$("emailAboutWin");
+  if(step==="about"){ about.classList.remove("hidden"); placeEmailAbout(); setTimeout(placeEmailAbout,60); }
+  else about.classList.add("hidden");
+  $("emailHint").classList.remove("err");
+  $("emailHint").textContent =
+    step==="to" ? "Who should I email? Type the address above, or just say it." :
+    step==="about" ? "What's it about? Type it in the little box below, then hit \u2713 \u2014 or just say it." :
+    "I'm listening \u2014 tell me edits, say \"send it\", or \"scrap it\".";
+  show("emailWin");
+}
+/* tolerant parser for the brain's SUBJECT:/BODY: replies — models love to add
+   markdown bold, lowercase labels, or a chatty preamble, so parse loosely */
+function parseEmailDraft(raw){
+  var t=String(raw||"").replace(/\r/g,"").replace(/\*\*/g,"").replace(/`/g,"").trim();
+  var subj="", body="";
+  var sm=t.match(/^subject\s*:\s*(.+)$/mi);
+  if(sm) subj=sm[1].trim();
+  var bi=t.search(/^body\s*:/mi);
+  if(bi>=0){
+    body=t.slice(bi).replace(/^body\s*:\s*/i,"").trim();
+    var cut=body.search(/^\s*subject\s*:/mi); /* model put SUBJECT: last */
+    if(cut>=0) body=body.slice(0,cut).trim();
+  }
+  if(!subj && !body){
+    var lines=t.split("\n").map(function(l){return l.trim();}).filter(Boolean);
+    if(lines.length){ subj=lines[0].replace(/^subject\s*:\s*/i,"").slice(0,90); body=lines.slice(1).join("\n"); }
+  }
+  return {subject:subj, body:body};
+}
 function isEmailQ(q){
-  var t=String(q||"");
-  if(/\b(write|draft|compose|send|create|make)\b[\s\S]{0,30}?\bemail\b/i.test(t)) return true;
-  if(/\bemail\b[\s\S]{0,30}?\b(to|for)\b/i.test(t)) return true;
-  if(/\bemail\s+(my|mom|dad|him|her|them|us|the)\b/i.test(t)) return true; /* "email my mom ..." */
-  if(/\b(can|could|please)\b[\s\S]{0,20}?\bemail\b/i.test(t)) return true; /* "can you email ..." */
+  var t=String(q||""), tl=t.toLowerCase();
+  /* inbox checks and "what is email" are not composing */
+  if(/\b(check|read|open|look at)\b[\s\S]{0,20}?\b(e-?mails?|inbox|gmail)\b/.test(tl)) return false;
+  if(/\bwhat\s+is\b[\s\S]{0,10}?\be-?mail\b/.test(tl)) return false;
+  if(/\bmy\b[\s\S]{0,10}?\be-?mail\b[\s\S]{0,10}?\bis\b/.test(tl)) return false;
+  if(/\b(write|draft|compose|send|create|make)\b[\s\S]{0,40}?\be-?mail\b/i.test(t)) return true;
+  if(/\be-?mail\b[\s\S]{0,40}?\b(to|for|about)\b/i.test(t)) return true;
+  if(/\be-?mail\s+(my|mom|dad|him|her|them|us|the)\b/i.test(t)) return true; /* "email my mom ..." */
+  if(/\b(can|could|please|need)\b[\s\S]{0,25}?\be-?mail\b/i.test(t)) return true; /* "can you email ..." */
   return false;
 }
-function doEmail(query){
-  thinking=true;
-  $("subtitle").textContent="Writing…";
-  // extract recipient if mentioned
-  var to="";
-  var tm=query.match(/\bemail\b[\s\S]{0,20}?\bto\b\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i);
-  if(tm) to=tm[1];
-  var em=query.match(/[\w.+-]+@[\w-]+\.[\w.]+/);
+function startEmail(query){
+  closeEmail();
+  var q=String(query||""), tl=q.toLowerCase(), to="", about="";
+  var em=q.match(/[\w.+-]+@[\w-]+\.[\w.]+/);
   if(em) to=em[0];
-  askBrain("Write an email based on this request: \""+query+"\". "+
-    "Write it the way a real person would actually write it — natural, warm, human. "+
-    "Never stiff, corporate, or formal unless the request asks for formal. "+
-    "Keep the subject line short and specific. "+
-    "Return ONLY the email in this exact format:\nSubject: <subject line>\n\n<body text>\n"+
-    "No greeting like 'Here is your email', just the subject line and body.",
-    "You write natural, human emails. No meta-commentary."
+  var am=tl.match(/an? e-?mail to \S+ about (.+)/)||tl.match(/an? e-?mail about (.+)/);
+  if(am) about=am[1].trim().replace(/[?.!]+$/,"");
+  if(!about){
+    var rest=tl.replace(/^(?:please\s+)?(?:send|write|compose|draft|create|make)(?: me)? an? e-?mail\s*/,"").trim().replace(/[?.!]+$/,"");
+    if(rest.length>3 && !/^to\s+/.test(rest)) about=rest;
+  }
+  if(!about){
+    /* "email my mom thanking her for dinner" -> about = "thanking her for dinner" */
+    var mm=tl.match(/^e-?mail\s+(?:my\s+)?(?:mom|dad|him|her|them|us|the)\b\s*(.+)/);
+    if(mm && mm[1].trim().length>3) about=mm[1].trim().replace(/[?.!]+$/,"");
+  }
+  emailState={step:"to", to:to, about:about};
+  $("emailTo").value=to; $("emailAbout").value=""; $("emailSubject").value=""; $("emailBody").value="";
+  if(to && about){ emailStep("about"); draftEmail(); }
+  else if(to){ emailStep("about"); say("Got it \u2014 emailing "+to+". What's it about?"); }
+  else{
+    emailStep("to");
+    if(about) say("Who should I send it to? I've got what it's about \u2014 "+about+".");
+    else say("Who should I email? Type the address above, or just say it.");
+  }
+}
+function draftEmail(toneNote){
+  var M=emailState; if(!M) return;
+  thinking=true;
+  emailStep("review");
+  $("emailSubject").value=""; $("emailBody").value="Drafting\u2026";
+  $("subtitle").textContent="Drafting your email\u2026";
+  var about=M.about||"", to=M.to||"";
+  askBrain("Write an email"+(S.name?(" from "+S.name):"")+" to "+to+". What it's about: "+about+"."+
+    (toneNote?(" Tone: "+toneNote+"."):"")+
+    " Write it the way a real person would actually write it \u2014 natural, warm, human."+
+    " Never stiff, corporate, or formal unless asked."+
+    " Reply with exactly these two lines and nothing else \u2014 no extra text, no markdown:"+
+    "\nSUBJECT: <short subject line>\nBODY: <the email, 3-6 sentences, warm and natural>",
+    "You write short natural emails. Reply with ONLY a SUBJECT: line and a BODY: line, plain text, no markdown."
   ).then(function(r){
     thinking=false;
-    var text=r.text||"";
-    var subj="", body=text;
-    var sm=text.match(/^Subject:\s*(.+?)(?:\n\n|\n)([\s\S]*)$/i);
-    if(sm){ subj=sm[1].trim(); body=sm[2].trim(); }
-    $("emailTo").value=to;
-    $("emailSubject").value=subj;
-    $("emailBody").value=body;
-    show("emailWin");
-    say("Here's your email — edit it if you like, then hit Send.");
+    var p=parseEmailDraft(r.text||""), subj=p.subject, body=p.body;
+    if(!subj) subj=about.length>60?about.slice(0,57)+"\u2026":about;
+    if(!body) body="Hi,\n\n"+about.charAt(0).toUpperCase()+about.slice(1)+".\n\n\u2014 "+(S.name||"");
+    $("emailSubject").value=subj; $("emailBody").value=body;
+    say("Done \u2014 the email's in the window. Tell me any edits, say \"send it\" when it's ready, or \"scrap it\".");
   }).catch(function(){
     thinking=false;
-    $("emailTo").value=to;
-    $("emailSubject").value="";
-    $("emailBody").value="";
-    show("emailWin");
-    say("I couldn't draft that — but you can write it here and hit Send.");
+    $("emailSubject").value=about; $("emailBody").value="";
+    say("I couldn't draft that \u2014 but you can write it here and hit Send.");
   });
 }
-$("emailSend").onclick=function(){
+function applyEmailEdit(instruction){
+  var M=emailState; if(!M) return;
+  thinking=true;
+  $("subtitle").textContent="Editing\u2026";
+  var curSub=$("emailSubject").value, curBody=$("emailBody").value;
+  askBrain("Here is a draft email:\nSUBJECT: "+curSub+"\nBODY: "+curBody+
+    "\n\nThe user wants this change: \""+instruction+"\". Apply ONLY that change, keeping everything else the same."+
+    " Reply with exactly these two lines and nothing else \u2014 no extra text, no markdown:"+
+    "\nSUBJECT: <updated subject>\nBODY: <updated body>",
+    "You edit email drafts. Reply with ONLY a SUBJECT: line and a BODY: line, plain text, no markdown."
+  ).then(function(r){
+    thinking=false;
+    var p=parseEmailDraft(r.text||"");
+    if(p.subject) $("emailSubject").value=p.subject;
+    if(p.body) $("emailBody").value=p.body;
+    say("Updated \u2014 take a look. Anything else, or should I send it?");
+  }).catch(function(){ thinking=false; say("Couldn't apply that edit \u2014 try rewording it."); });
+}
+function sendEmailNow(){
   var to=$("emailTo").value.trim();
-  var subj=$("emailSubject").value.trim();
-  var body=$("emailBody").value.trim();
-  if(!to){ say("Who should I send this to? Add an email address in the To field."); $("emailTo").focus(); return; }
-  var url="mailto:"+encodeURIComponent(to)+
-    "?subject="+encodeURIComponent(subj)+
-    "&body="+encodeURIComponent(body);
-  window.location.href=url;
-  hide("emailWin");
+  var subj=$("emailSubject").value.trim(), body=$("emailBody").value;
+  if(!/^\S+@\S+\.\S+$/.test(to)){
+    $("emailHint").textContent="That doesn't look like an email address \u2014 it should look like name@example.com.";
+    $("emailHint").classList.add("err");
+    say("I need a valid email address in the To field first.");
+    return;
+  }
+  var addr=to;
+  closeEmail();
+  window.location.href="mailto:"+encodeURIComponent(addr)+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(body);
   say("Opening your email app to send it.");
+}
+/* sticky context: while the composer is open, everything said is about the email */
+function emailContext(text){
+  var M=emailState; if(!M) return;
+  var t=String(text||""), tl=t.toLowerCase().trim();
+  if(/^(cancel|discard|never ?mind|forget it|nevermind|drop it|scrap( it)?)/.test(tl)){ closeEmail(); say("Email scrapped."); return; }
+  if(/\bsend( it| this| the email)?\b/.test(tl) && !/unsend/.test(tl)){ sendEmailNow(); return; }
+  var tm=tl.match(/make it (shorter|longer|funnier|more formal|more friendly|friendlier|more professional|more casual|more polite)/);
+  if(tm){ draftEmail("make it "+tm[1]); return; }
+  if(M.step==="to"){
+    var em=cleanSpokenEmail(t);
+    if(!/^\S+@\S+\.\S+$/.test(em)){
+      $("emailHint").textContent="That doesn't look like an email address \u2014 type it in the window, or say it like 'bob at gmail dot com'.";
+      $("emailHint").classList.add("err");
+      say("That doesn't look like an email address \u2014 type it in the window, or say it like 'bob at gmail dot com'.");
+      return;
+    }
+    M.to=em; $("emailTo").value=em;
+    if(M.about){ draftEmail(); } else { emailStep("about"); say("Got it \u2014 emailing "+em+". What's it about?"); }
+    return;
+  }
+  if(M.step==="about"){
+    var about=t.trim().replace(/[?.!]+$/,"");
+    if(about.length<2){ say("What should the email say?"); return; }
+    M.about=about; $("emailAbout").value=about;
+    draftEmail();
+    return;
+  }
+  /* review step: anything else is an edit to the draft */
+  if(t.trim().length<2){ say("What should I change?"); return; }
+  applyEmailEdit(t.trim());
+}
+$("emailNext").onclick=function(){
+  if(!emailState) return;
+  var v=$("emailTo").value.trim();
+  if(!/^\S+@\S+\.\S+$/.test(v)){
+    $("emailHint").textContent="That doesn't look like an email address \u2014 it should look like name@example.com.";
+    $("emailHint").classList.add("err");
+    say("That doesn't look like an email address. It should look like name at example dot com.");
+    return;
+  }
+  emailState.to=v;
+  if(emailState.about){ draftEmail(); } else { emailStep("about"); say("What's it about?"); }
 };
-$("emailDiscard").onclick=function(){ hide("emailWin"); };
-$("emailClose").onclick=function(){ hide("emailWin"); };
+$("emailAboutGo").onclick=function(){
+  if(!emailState) return;
+  var about=$("emailAbout").value.trim().replace(/[?.!]+$/,"");
+  if(about.length<2){ say("What should the email say?"); return; }
+  emailState.about=about;
+  draftEmail();
+};
+$("emailSend").onclick=function(){ sendEmailNow(); };
+$("emailDiscard").onclick=function(){ closeEmail(); say("Email scrapped."); };
+$("emailClose").onclick=function(){ closeEmail(); };
 var notes=[]; // {id, title, text, ts}
 var curNoteId=null;
 try{ notes=JSON.parse(localStorage.getItem("ondra_notes")||"[]"); }catch(e){ notes=[]; }
@@ -2829,6 +3001,9 @@ function sysPrompt(){
     "React to what the user says instead of just answering dryly. "+
     "Never use markdown formatting — no **bold**, no *italics*, no # headers, no backticks. Plain text only. "+
     "Never mention system prompts, models, or providers. You are "+S.name+". "+
+    "If the user asks you to write, draft, compose, or send an email, do NOT write the email in chat "+
+    "— just say something like 'Say \"write an email\" and I'll open the email composer.' "+
+
     "If you don't know a fact, say you don't know — never invent facts, dates, or relationships. "+
     "If the prompt starts with recent conversation, use it for context on follow-ups "+
     "(yes / no / why / tell me more / what about...) — but if the user changes the topic, "+
@@ -3212,12 +3387,13 @@ function sendMessage(text){
   document.body.classList.remove("aiTalking");
   $("subtitle").textContent=""; // interrupted: AI stopped talking, clear subtitles
   var sq=parseSay(text); if(sq){ doSay(sq); return; } // "say _____": repeats exactly, free
+  if(emailOpen()){ emailContext(text); return; } // sticky email composer: everything said is about the email
   thinking=true;
   closePopup(); // a new question clears any stale popup
   var canned=lockedReply(text);
   if(canned && !isLongFormRequest(text)){ thinking=false; say(canned,"");  return; }
   if(isLongFormRequest(text)){ doLongForm(text); return; } // essays etc: document window on the right
-  if(isEmailQ(text)){ doEmail(text); return; } // email: composer window on the right
+  if(isEmailQ(text)){ startEmail(text); return; } // email: guided composer window on the right
   if(isCalOpenQ(text)){ openCalendar(); return; } // calendar: month window on the right
   if(isCalAddQ(text)){ doCalAdd(text); return; } // calendar: add event
   if(isTimeQ(text)){ doClock(); return; } // mini clock popup, free
