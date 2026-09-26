@@ -4,7 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ondra</title>
-<!-- GCAI DEMO v34.6 — 2026-09-25: Google OAuth client ID wired in —
+<!-- GCAI DEMO v34.8 — 2026-09-25: built-in local calendar (no Google account needed,
+     events saved on-device); voice "open calendar" shows the month;
+     rail Calendar button opens a big two-year window (this year + next, no past years);
+     Gmail send scope dropped from Google linking (frees up Google's free verification path).
+     GCAI DEMO v34.7 — 2026-09-25: dropped the Gmail send scope —
+     Google linking is Calendar-only now (frees up Google's free verification path);
+     Linked Accounts Connect button stays.
+     GCAI DEMO v34.6 — 2026-09-25: Google OAuth client ID wired in —
      Linked Accounts Google Connect now works (Gmail + Calendar, testing mode).
      GCAI DEMO v34.5 — 2026-09-24: feedback now posts to the "Ondra feedback"
      Google Form owned by the GCAI account (the old one was under Liam's
@@ -529,6 +536,35 @@
   .cal-day .ev { font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
            background:rgba(138,180,255,.2); border-radius:4px; padding:1px 4px; margin-top:2px; }
   .cal-day .ev.hol { background:rgba(52,199,89,.2); }
+  /* year calendar (rail button): this year + next year */
+  #yearWin { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); width:min(1060px, calc(100vw - 36px));
+           max-height:86vh; overflow:hidden; display:flex; flex-direction:column; z-index:80; border-radius:24px;
+           background:
+             linear-gradient(160deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.03) 28%, rgba(255,255,255,0) 55%),
+             rgba(16,20,29,.58);
+           -webkit-backdrop-filter:blur(24px) saturate(1.7);
+           backdrop-filter:blur(24px) saturate(1.7);
+           border:1px solid rgba(255,255,255,.2);
+           box-shadow:0 16px 56px rgba(0,0,0,.5),
+                      inset 0 1px 1px rgba(255,255,255,.35),
+                      inset 0 -1px 1px rgba(255,255,255,.08);
+           padding:18px 20px 22px; animation:popIn .32s ease; }
+  #yearWin.hidden { display:none; }
+  #yearGrid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; overflow-y:auto; padding:4px 2px; }
+  @media (max-width:900px){ #yearGrid { grid-template-columns:repeat(3,1fr); } }
+  @media (max-width:640px){ #yearGrid { grid-template-columns:repeat(2,1fr); } }
+  .ym { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.09); border-radius:14px; padding:10px 10px 12px; }
+  .ym-t { font-size:13px; font-weight:700; color:#eef1f6; margin-bottom:8px; cursor:pointer; }
+  .ym-t:hover { color:#8ab4ff; }
+  .ym-g { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+  .ym-dow { color:#8a93a6; font-size:9px; text-align:center; font-weight:600; padding:2px 0; }
+  .ym-d { min-height:26px; border-radius:6px; font-size:10px; color:#dfe5ef; text-align:center;
+          padding:2px 0; cursor:pointer; position:relative; }
+  .ym-d:hover { background:rgba(138,180,255,.14); }
+  .ym-d.pad { cursor:default; }
+  .ym-d.pad:hover { background:none; }
+  .ym-d.today { background:rgba(138,180,255,.22); border:1px solid #8ab4ff; }
+  .ym-d .dot { width:5px; height:5px; border-radius:50%; background:#8ab4ff; margin:1px auto 0; }
   #popup.hidden { display:none; }
   @keyframes popIn { from { opacity:0; transform:translateY(-50%) translateX(24px); } to { opacity:1; transform:translateY(-50%); } }
   .popup-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;
@@ -874,6 +910,16 @@
       </div>
     </div>
     <div id="calGrid"></div>
+  </div>
+  <!-- 4f2. YEAR CALENDAR (rail button: this year + next year) -->
+  <div id="yearWin" class="hidden">
+    <div class="doc-head">
+      <span id="yearTitle">Calendar</span>
+      <div class="doc-actions">
+        <button id="yearClose" data-tip="Close" aria-label="close">✕</button>
+      </div>
+    </div>
+    <div id="yearGrid"></div>
   </div>
   <!-- 4b. FEEDBACK (removed: demo-only) -->
   <div id="edgeBtns">
@@ -2131,14 +2177,19 @@ function openNotepad(){
   }
   show("notepadModal");
 }
-/* ================= GOOGLE + CALENDAR ================= */
+/* ================= GOOGLE LINK + BUILT-IN CALENDAR ================= */
 // Google OAuth client ID — created 2026-09-25 in Google Cloud Console
-// (project "Ondra", GCAI account; Gmail + Calendar scopes, testing mode)
+// (project "Ondra", GCAI account; Calendar scope only, testing mode)
 var GOOGLE_CLIENT_ID="913565937624-mo55ro1ri3lsj55o7634mt8akip49da1.apps.googleusercontent.com";
 var gToken=null; // OAuth access token (memory only)
-var calEvents=[]; // cached events for the visible month
+var calEvents=[]; // built-in calendar events: {id,title,date:"YYYY-MM-DD"} (localStorage)
 var calYear=0, calMonth=0;
 var pendingCalAdd=null; // {date} — set when we asked "what's the event?"
+
+function loadCalEvents(){ try{ calEvents=JSON.parse(localStorage.getItem("ondra_cal")||"[]"); }catch(e){ calEvents=[]; } }
+function saveCalEvents(){ try{ localStorage.setItem("ondra_cal", JSON.stringify(calEvents)); }catch(e){} }
+function dstr(dt){ var m=dt.getMonth()+1, d=dt.getDate(); return dt.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(d<10?"0":"")+d; }
+loadCalEvents();
 
 function googleLinked(){ return !!gToken; }
 
@@ -2155,7 +2206,7 @@ function linkGoogle(){
   try{
     var client=google.accounts.oauth2.initTokenClient({
       client_id:GOOGLE_CLIENT_ID,
-      scope:"https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/gmail.send",
+      scope:"https://www.googleapis.com/auth/calendar",
       callback:function(resp){
         if(resp.access_token){
           gToken=resp.access_token;
@@ -2178,11 +2229,7 @@ function calApi(path, method, body){
 }
 
 function openCalendar(){
-  if(!googleLinked()){
-    say("Link your Google account first — open the menu, tap the chain icon, and hit Connect.");
-    show("linksModal");
-    return;
-  }
+  hide("yearWin");
   var now=new Date();
   calYear=now.getFullYear(); calMonth=now.getMonth();
   show("calWin");
@@ -2192,19 +2239,7 @@ function openCalendar(){
 
 function loadCalMonth(){
   $("calTitle").textContent=new Date(calYear,calMonth,1).toLocaleDateString(undefined,{month:"long",year:"numeric"});
-  var first=new Date(calYear,calMonth,1);
-  var start=new Date(first); start.setDate(start.getDate()-first.getDay());
-  var end=new Date(calYear,calMonth+1,0); end.setDate(end.getDate()+ (6-end.getDay()));
-  var tmin=start.toISOString(), tmax=end.toISOString();
-  Promise.all([
-    calApi("/calendars/primary/events?timeMin="+encodeURIComponent(tmin)+"&timeMax="+encodeURIComponent(tmax)+"&singleEvents=true&orderBy=startTime"),
-    calApi("/calendars/en.usa%23holiday%40group.v.calendar.google.com/events?timeMin="+encodeURIComponent(tmin)+"&timeMax="+encodeURIComponent(tmax)+"&singleEvents=true")
-  ]).then(function(rs){
-    calEvents=[];
-    (rs[0].items||[]).forEach(function(e){ calEvents.push({ev:e, hol:false}); });
-    (rs[1].items||[]).forEach(function(e){ calEvents.push({ev:e, hol:true}); });
-    renderCalMonth();
-  }).catch(function(){ renderCalMonth(); });
+  renderCalMonth();
 }
 
 function renderCalMonth(){
@@ -2223,13 +2258,12 @@ function renderCalMonth(){
     if(dt.getTime()===today.getTime()) cell.classList.add("today");
     var num=document.createElement("div"); num.className="dnum"; num.textContent=dt.getDate();
     cell.appendChild(num);
-    var dayStr=dt.toISOString().slice(0,10);
+    var dayStr=dstr(dt);
     calEvents.forEach(function(ce){
-      var s=ce.ev.start&&(ce.ev.start.date||ce.ev.start.dateTime||"").slice(0,10);
-      if(s===dayStr){
+      if(ce.date===dayStr){
         var ev=document.createElement("div");
-        ev.className="ev"+(ce.hol?" hol":"");
-        ev.textContent=ce.ev.summary||"";
+        ev.className="ev";
+        ev.textContent=ce.title||"";
         cell.appendChild(ev);
       }
     });
@@ -2239,7 +2273,52 @@ function renderCalMonth(){
 $("calPrev").onclick=function(){ calMonth--; if(calMonth<0){calMonth=11;calYear--;} loadCalMonth(); };
 $("calNext").onclick=function(){ calMonth++; if(calMonth>11){calMonth=0;calYear++;} loadCalMonth(); };
 $("calClose").onclick=function(){ hide("calWin"); };
-$("menuCal").onclick=function(){ closeMenu(); openCalendar(); };
+$("menuCal").onclick=function(){ closeMenu(); openYearCal(); };
+
+// big year view (rail button): this year + next year, no past years
+function openYearCal(){
+  hide("calWin");
+  renderYearCal();
+  show("yearWin");
+  say("Here's your calendar.");
+}
+function renderYearCal(){
+  var now=new Date(), y0=now.getFullYear();
+  var grid=$("yearGrid"); grid.innerHTML="";
+  [y0, y0+1].forEach(function(y){
+    for(var m=0;m<12;m++) grid.appendChild(yearMonthEl(y,m));
+  });
+}
+function yearMonthEl(y,m){
+  var wrap=document.createElement("div"); wrap.className="ym";
+  var t=document.createElement("div"); t.className="ym-t";
+  t.textContent=new Date(y,m,1).toLocaleDateString(undefined,{month:"long",year:"numeric"});
+  var goMonth=function(){ calYear=y; calMonth=m; hide("yearWin"); show("calWin"); loadCalMonth(); };
+  t.onclick=goMonth;
+  wrap.appendChild(t);
+  var gd=document.createElement("div"); gd.className="ym-g";
+  ["S","M","T","W","T","F","S"].forEach(function(d){ var h=document.createElement("div"); h.className="ym-dow"; h.textContent=d; gd.appendChild(h); });
+  var off=new Date(y,m,1).getDay();
+  var days=new Date(y,m+1,0).getDate();
+  var today=new Date(); today.setHours(0,0,0,0);
+  for(var i=0;i<off;i++){ var p=document.createElement("div"); p.className="ym-d pad"; gd.appendChild(p); }
+  for(var d=1;d<=days;d++){
+    (function(day){
+      var dt=new Date(y,m,day);
+      var c=document.createElement("div"); c.className="ym-d";
+      if(dt.getTime()===today.getTime()) c.classList.add("today");
+      var n=document.createElement("div"); n.className="n"; n.textContent=day; c.appendChild(n);
+      var ds=dstr(dt), has=false;
+      calEvents.forEach(function(e){ if(e.date===ds) has=true; });
+      if(has){ var dot=document.createElement("div"); dot.className="dot"; c.appendChild(dot); }
+      c.onclick=goMonth;
+      gd.appendChild(c);
+    })(d);
+  }
+  wrap.appendChild(gd);
+  return wrap;
+}
+$("yearClose").onclick=function(){ hide("yearWin"); };
 
 // calendar voice intents
 function isCalOpenQ(q){ return /\b(open|show|view|see|display)\b[\s\S]{0,20}?\bcalendar\b/i.test(q); }
@@ -2261,23 +2340,13 @@ function parseCalDate(q){
 }
 
 function addCalEvent(title, date){
-  // random midday time: 11am–2pm
-  var hr=11+Math.floor(Math.random()*4);
-  var start=new Date(date); start.setHours(hr,0,0,0);
-  var end=new Date(start); end.setHours(hr+1,0,0,0);
-  return calApi("/calendars/primary/events", "POST", {
-    summary:title,
-    start:{dateTime:start.toISOString()},
-    end:{dateTime:end.toISOString()}
-  });
+  var d=new Date(date); d.setHours(0,0,0,0);
+  calEvents.push({id:"e"+Date.now()+Math.floor(Math.random()*1e6), title:String(title||"New event"), date:dstr(d)});
+  saveCalEvents();
+  return Promise.resolve();
 }
 
 function doCalAdd(query){
-  if(!googleLinked()){
-    say("Link your Google account first — open the menu, tap the chain icon, and hit Connect.");
-    show("linksModal");
-    return;
-  }
   var date=parseCalDate(query);
   // extract event title: "add X to December 19th" or "add X on December 19th"
   var title="";
@@ -2294,6 +2363,7 @@ function doCalAdd(query){
   addCalEvent(title,date).then(function(){
     say("Added "+title+".");
     if(!$("calWin").classList.contains("hidden")) loadCalMonth();
+    if(!$("yearWin").classList.contains("hidden")) renderYearCal();
   }).catch(function(){ say("Couldn't add that — try again."); });
 }
 function closeMenu(){
@@ -2860,6 +2930,7 @@ function sendMessage(text){
     addCalEvent(t,d).then(function(){
       say("Added "+t+".");
       if(!$("calWin").classList.contains("hidden")) loadCalMonth();
+      if(!$("yearWin").classList.contains("hidden")) renderYearCal();
     }).catch(function(){ say("Couldn't add that — try again."); });
     return;
   }
