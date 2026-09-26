@@ -4,7 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ondra</title>
-<!-- ONDRA v35.0 — 2026-09-26: honest event-driven mic status (Settings can never
+<!-- ONDRA v35.1 — 2026-09-26: Memory — rail brain button replaces Linked Accounts;
+     "what do you remember about me" opens the viewer silently (free);
+     personal facts auto-saved on-device, X to forget each, 2-month rolling expiry;
+     stored memories feed the brain so Ondra actually uses them.
+     ONDRA v35.0 — 2026-09-26: honest event-driven mic status (Settings can never
      show Mic off while the mic is on; auto-restarts with backoff); wake and
      question follow-up dings respect Audio off; Settings voice toggle and the
      edge voice button now stay in sync; rotating segmented rainbow aura;
@@ -499,6 +503,36 @@
   .note-item .note-del { background:rgba(255,107,107,.1); border:1px solid rgba(255,107,107,.25); color:#ff8a8a;
            font-size:15px; cursor:pointer; padding:6px 10px; border-radius:10px; transition:all .2s ease; }
   .note-item .note-del:hover { background:rgba(255,107,107,.2); color:#ff5555; border-color:#ff6b6b; }
+  /* memory viewer */
+  #memoryModal { position:fixed; left:72%; top:50%; transform:translate(-50%,-50%); width:440px; max-width:calc(100vw - 36px);
+           max-height:70vh; overflow:hidden; display:flex; flex-direction:column; z-index:90; border-radius:24px;
+           background:
+             linear-gradient(160deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.03) 28%, rgba(255,255,255,0) 55%),
+             rgba(16,20,29,.58);
+           -webkit-backdrop-filter:blur(24px) saturate(1.7);
+           backdrop-filter:blur(24px) saturate(1.7);
+           border:1px solid rgba(255,255,255,.2);
+           box-shadow:0 16px 56px rgba(0,0,0,.5),
+                      inset 0 1px 1px rgba(255,255,255,.35),
+                      inset 0 -1px 1px rgba(255,255,255,.08);
+           padding:20px 22px 24px; animation:noteGlide .45s cubic-bezier(.2,.9,.25,1); }
+  #memoryModal.hidden { display:none; }
+  #memoryModal .popup-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  #memoryModal .popup-head span { font-size:17px; font-weight:600; color:#eef1f6; }
+  #memoryModal .popup-head button { width:32px; height:32px; border-radius:50%; border:1px solid rgba(255,255,255,.2);
+           background:rgba(255,255,255,.06); color:#dfe5ef; font-size:14px; cursor:pointer; }
+  #memoryModal .popup-head button:hover { border-color:#8ab4ff; color:#8ab4ff; }
+  #memoryList { overflow-y:auto; display:flex; flex-direction:column; gap:10px; margin-top:12px; padding-right:4px; }
+  .mem-item { padding:12px 14px; border-radius:14px;
+           background:linear-gradient(160deg, rgba(255,255,255,.1) 0%, rgba(255,255,255,.03) 100%);
+           border:1px solid rgba(255,255,255,.14);
+           display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .mem-item .mem-text { color:#eef1f6; font-size:14px; flex:1; }
+  .mem-item .mem-del { background:rgba(255,107,107,.1); border:1px solid rgba(255,107,107,.25); color:#ff8a8a;
+           font-size:13px; cursor:pointer; padding:5px 9px; border-radius:10px; transition:all .2s ease; flex:none; }
+  .mem-item .mem-del:hover { background:rgba(255,107,107,.2); color:#ff5555; border-color:#ff6b6b; }
+  #memoryFoot { margin-top:14px; color:#8a93a6; font-size:12px; text-align:center; }
+  #memoryClearAll { background:none; border:none; color:#8ab4ff; font-size:12px; cursor:pointer; text-decoration:underline; padding:0; }
   /* email composer */
   #emailWin { position:fixed; left:75%; top:50%; transform:translate(-50%,-50%); width:480px; max-width:calc(100vw - 36px);
            max-height:80vh; overflow:hidden; display:flex; flex-direction:column; z-index:80; border-radius:24px;
@@ -956,7 +990,7 @@
     <button id="menuCal" aria-label="Calendar"><svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true"><path d="M7 2v2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7zm12 8v8H5v-8h14z"/></svg><span class="tip">Calendar</span></button>
     <button id="menuEmail" aria-label="Email"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></svg><span class="tip">Email</span></button>
     <button id="menuCustom" aria-label="Customization"><svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.65-.75 1.65-1.69 0-.44-.18-.84-.44-1.13-.26-.29-.43-.68-.43-1.12 0-.94.76-1.7 1.7-1.7h2.34c2.86 0 5.18-2.32 5.18-5.18C22 6.5 17.5 2 12 2zm-6.5 9a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4-3.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4.5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3.5 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg><span class="tip">Customization</span></button>
-    <button id="menuLinks" aria-label="Linked Accounts" style="margin-top:auto"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span class="tip">Linked Accounts</span></button>
+    <button id="menuMemory" aria-label="Memory" style="margin-top:auto"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3.5c-4.7 0-8.5 3.6-8.5 8 0 1.6.5 3 1.3 4.2.9 2.6 3.3 4.3 6.2 4.3h2c2.9 0 5.3-1.7 6.2-4.3.8-1.2 1.3-2.6 1.3-4.2 0-4.4-3.8-8-8.5-8z"/><path d="M12 3.5V20"/><path d="M8.6 8.3c-1.2.2-2.1 1.2-2.1 2.4M8.8 13c-1.2.3-2.1 1.3-2.1 2.5M15.4 8.3c1.2.2 2.1 1.2 2.1 2.4M15.2 13c1.2.3 2.1 1.3 2.1 2.5"/></svg><span class="tip">Memory</span></button>
     <button id="menuSettings" aria-label="Settings"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="tip">Settings</span></button>
   </div>
   <button id="menuBtn" data-tip="Menu" aria-label="Menu"><svg viewBox="0 0 24 24" width="24" height="24" fill="#fff" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg></button>
@@ -964,6 +998,12 @@
   <div id="notepadModal" class="hidden">
     <div class="popup-head"><span class="tip">Notepad</span><div><button id="noteAdd" data-tip="New note" aria-label="new note">+</button><button id="notepadClose" data-tip="Close" aria-label="close">✕</button></div></div>
     <div id="notepadList"></div>
+  </div>
+  <!-- 4d2. MEMORY VIEWER -->
+  <div id="memoryModal" class="hidden">
+    <div class="popup-head"><span class="tip">Memory</span><div><button id="memoryClose" data-tip="Close" aria-label="close">✕</button></div></div>
+    <div id="memoryList"></div>
+    <div id="memoryFoot">Memories fade after 2 months unless you bring them up again. <button id="memoryClearAll">Forget everything</button></div>
   </div>
   <!-- 4e. EMAIL COMPOSER (LUNA-style guided flow: To -> what's it about -> draft -> review) -->
   <div id="emailWin" class="hidden">
@@ -2493,6 +2533,86 @@ function openNotepad(){
   }
   show("notepadModal");
 }
+/* ================= MEMORY =================
+   Personal facts Ondra picks up (name, birthday, favorites...) live on-device
+   in localStorage under "ondra_memories". Entries untouched for 60 days fade;
+   mentioning a fact again resets its clock. "What do you remember about me"
+   opens the viewer silently (free, no request spent). */
+var MEM_TTL=60*24*3600*1000, MEM_MAX=40;
+var userMemories=[];
+function loadMemories(){
+  try{ userMemories=JSON.parse(localStorage.getItem("ondra_memories")||"[]"); }catch(e){ userMemories=[]; }
+  var cut=Date.now()-MEM_TTL;
+  userMemories=userMemories.filter(function(m){ return m && m.text && (+m.touched||0)>cut; });
+}
+function saveMemories(){ try{ localStorage.setItem("ondra_memories", JSON.stringify(userMemories)); }catch(e){} }
+function normMem(s){ return String(s||"").toLowerCase().replace(/\s+/g," ").trim(); }
+function rememberFact(text){
+  text=String(text||"").replace(/\s+/g," ").trim().replace(/[.!?]+$/,"");
+  if(text.length<4||text.length>120) return;
+  text=text.charAt(0).toUpperCase()+text.slice(1);
+  var n=normMem(text), now=Date.now(), i;
+  for(i=0;i<userMemories.length;i++){
+    if(normMem(userMemories[i].text)===n){ userMemories[i].touched=now; saveMemories(); return; }
+  }
+  userMemories.push({id:"m"+now+Math.floor(Math.random()*999), text:text, touched:now});
+  userMemories.sort(function(a,b){ return b.touched-a.touched; });
+  while(userMemories.length>MEM_MAX) userMemories.pop();
+  saveMemories();
+}
+var MEM_PATTERNS=[
+  [/\bmy name is ([a-z][a-z .'\-]{1,28})/, "Their name is $1"],
+  [/\bcall me ([a-z][a-z .'\-]{1,28})/, "They go by $1"],
+  [/\bi(?:'m| am) (\d{1,3}) years old/, "They are $1 years old"],
+  [/\bmy birthday is ([a-z0-9 ,]{3,28})/, "Their birthday is $1"],
+  [/\bi live in ([a-z][a-z .'\-]{1,36})/, "They live in $1"],
+  [/\bi(?:'m| am) from ([a-z][a-z .'\-]{1,36})/, "They're from $1"],
+  [/\bmy favorite ([a-z ]{2,18}) is ([a-z0-9 .'\-]{1,36})/, "Their favorite $1 is $2"],
+  [/\bmy (mom|dad|mother|father|brother|sister|dog|cat)(?:'s)? name is ([a-z][a-z .'\-]{1,28})/, "Their $1's name is $2"],
+  [/\bremember that ([^.!?]{4,90})/, "$1"],
+  [/\bmy (xbox|playstation|psn|steam|discord)(?: (?:name|tag|id|username))? is ([a-z0-9 _\-]{2,28})/, "Their $1 name is $2"]
+];
+function cleanCap(s){ return String(s||"").trim().replace(/[.!?]+$/,"").slice(0,40); }
+function extractMemories(raw){
+  var t=" "+String(raw||"").toLowerCase()+" ";
+  for(var k=0;k<MEM_PATTERNS.length;k++){
+    var m=t.match(MEM_PATTERNS[k][0]);
+    if(!m) continue;
+    var fact=MEM_PATTERNS[k][1];
+    for(var g=1;g<m.length;g++){ fact=fact.split("$"+g).join(cleanCap(m[g])); }
+    if(/\$\d/.test(fact)) continue;
+    rememberFact(fact);
+  }
+}
+function memoryPrompt(){
+  if(!userMemories.length) return "";
+  return "Things you remember about the user (work them in naturally when relevant; never recite as a list unless asked):\n"+
+    userMemories.slice(0,20).map(function(m){ return "- "+m.text; }).join("\n")+"\n\n";
+}
+function isMemoryQ(t){
+  t=String(t||"").toLowerCase();
+  return /what do you remember|my memor|your memor|open memor/.test(t);
+}
+function openMemory(){
+  closeMenu();
+  var list=$("memoryList"); list.innerHTML="";
+  if(!userMemories.length){
+    list.innerHTML='<div style="color:#8a93a6;font-size:14px;text-align:center;padding:24px 12px;">Nothing here yet \u2014 just talk to me and I\u2019ll remember the important stuff.</div>';
+  }else{
+    userMemories.forEach(function(m){
+      var item=document.createElement("div"); item.className="mem-item";
+      var tx=document.createElement("span"); tx.className="mem-text"; tx.textContent=m.text;
+      var del=document.createElement("button"); del.className="mem-del"; del.textContent="\u2715"; del.title="Forget this";
+      del.onclick=function(e){ e.stopPropagation(); userMemories=userMemories.filter(function(x){ return x.id!==m.id; }); saveMemories(); openMemory(); };
+      item.appendChild(tx); item.appendChild(del); list.appendChild(item);
+    });
+  }
+  show("memoryModal");
+}
+$("memoryClose").onclick=function(){ hide("memoryModal"); };
+$("memoryClearAll").onclick=function(){ userMemories=[]; saveMemories(); openMemory(); };
+$("memoryModal").onclick=function(e){ if(e.target===$("memoryModal")) hide("memoryModal"); };
+loadMemories();
 /* ================= GOOGLE LINK + BUILT-IN CALENDAR ================= */
 // Google OAuth client ID — created 2026-09-25 in Google Cloud Console
 // (project "Ondra", GCAI account; Calendar scope only, testing mode)
@@ -2861,9 +2981,9 @@ $("menuNotes").onclick=function(){
   closeMenu();
   openNotepad();
 };
-$("menuLinks").onclick=function(){
+$("menuMemory").onclick=function(){
   closeMenu();
-  show("linksModal");
+  openMemory();
 };
 $("menuSettings").onclick=function(){
   closeMenu();
@@ -3037,7 +3157,8 @@ function sysPrompt(){
     "You can answer time/date questions from the device clock and look up general knowledge. "+
     "When the answer has more than one item — key points, tips, steps, reasons, lists of anything — "+
     "always put each item on its own line starting with a dash, never a run-on paragraph. "+
-    "Answer the actual question directly and make sense — never ramble or go off-topic.";
+    "Answer the actual question directly and make sense — never ramble or go off-topic."+
+    memoryPrompt();
   if(S.pers==="cheerful")
     return base+" Personality: cheerful and upbeat — genuinely warm, enthusiastic, playful. React with real energy, crack a light joke when it fits, make the user smile.";
   if(S.pers==="moody")
@@ -3402,6 +3523,7 @@ function sendMessage(text){
   }
   
   pushHist("user",text);
+  extractMemories(text);
   unlockAudio();
   // stop any current speech (interrupt)
   speakToken++;
@@ -3416,6 +3538,7 @@ function sendMessage(text){
   closePopup(); // a new question clears any stale popup
   var wcp=worldClockPlace(text);
   if(wcp){ doWorldClock(wcp); return; } // "what time is it in <place>": world clock popup
+  if(isMemoryQ(text)){ openMemory(); return; } // memory viewer: silent, free
   var canned=lockedReply(text);
   if(canned && !isLongFormRequest(text)){ thinking=false; say(canned,"");  return; }
   if(isLongFormRequest(text)){ doLongForm(text); return; } // essays etc: document window on the right
