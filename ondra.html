@@ -4,7 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ondra</title>
-<!-- GCAI DEMO v34.8 — 2026-09-25: built-in local calendar (no Google account needed,
+<!-- GCAI DEMO v34.9 — 2026-09-26: Settings shows a live mic/audio mute status
+     indicator; fixed the Linked Accounts Connect button (an old "coming soon"
+     placeholder was overriding the real Google OAuth handler).
+     v34.8 — 2026-09-25: built-in local calendar (no Google account needed,
      events saved on-device); voice "open calendar" shows the month;
      rail Calendar button opens a big two-year window (this year + next, no past years);
      Gmail send scope dropped from Google linking (frees up Google's free verification path).
@@ -653,6 +656,9 @@
   .modal-card p.sub { color:#9aa3b2; font-size:14px; margin-bottom:18px; line-height:1.5; }
   .trow { margin-bottom:16px; }
   .tlabel { font-size:13px; letter-spacing:2px; text-transform:uppercase; color:#8ab4ff; margin-bottom:10px; }
+  .setStatus { font-size:15px; font-weight:600; }
+  .setStatus .on { color:#34c759; }
+  .setStatus .off { color:#ff5b5b; }
   .swatches.sm .sw { width:42px; height:42px; }
   .tabicon-prev { width:52px; height:52px; border-radius:13px; margin:0 auto;
                   border:1px solid rgba(255,255,255,.16); display:flex; align-items:center; justify-content:center; }
@@ -973,6 +979,7 @@
   <div class="modal-card">
     <h2>Settings</h2>
     <p class="sub">How your AI behaves.</p>
+    <div class="trow"><div class="tlabel">Status</div><div class="setStatus" id="setStatus"></div></div>
     <div class="trow"><div class="tlabel">Microphone</div><button class="btn" id="setMic">Toggle mic</button></div>
     <div class="trow"><div class="tlabel">Voice</div><button class="btn" id="setVoice">Toggle voice</button></div>
     <div class="modal-nav">
@@ -2406,10 +2413,17 @@ $("menuLinks").onclick=function(){
 $("menuSettings").onclick=function(){
   closeMenu();
   show("settingsModal");
+  updateSetStatus();
 };
 $("settingsClose").onclick=function(){ hide("settingsModal"); };
 $("settingsModal").onclick=function(e){ if(e.target===$("settingsModal")) hide("settingsModal"); };
-$("setMic").onclick=function(){ toggleMic(); };
+function updateSetStatus(){
+  var el=$("setStatus"); if(!el) return;
+  var mic=!!micOn, aud=!S.voiceMuted;
+  el.innerHTML='<span class="'+(mic?"on":"off")+'">Mic '+(mic?"on":"off")+'</span> · '+
+               '<span class="'+(aud?"on":"off")+'">Audio '+(aud?"on":"off")+'</span>';
+}
+$("setMic").onclick=function(){ toggleMic(); updateSetStatus(); };
 $("setVoice").onclick=function(){
   S.voiceMuted=!S.voiceMuted;
   if(S.voiceMuted){ // stop any speech already playing
@@ -2417,6 +2431,7 @@ $("setVoice").onclick=function(){
     stopNetAudio();
   }
   var st=settings()||{}; st.voiceMuted=S.voiceMuted; saveSettings(st);
+  updateSetStatus();
 };
 $("menuCustom").onclick=function(){
   closeMenu();
@@ -2429,9 +2444,6 @@ $("menuCustom").onclick=function(){
 };
 $("linksClose").onclick=function(){ hide("linksModal"); };
 $("linksModal").onclick=function(e){ if(e.target===$("linksModal")) hide("linksModal"); };
-$("linkGoogle").onclick=function(){
-  say("Google linking is coming soon — for now I can draft emails and open your mail app to send them.");
-};
 $("notepadClose").onclick=function(){ hide("notepadModal"); };
 $("notepadModal").onclick=function(e){ if(e.target===$("notepadModal")) hide("notepadModal"); };
 function doLongForm(query){
