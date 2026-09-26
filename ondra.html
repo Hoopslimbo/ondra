@@ -953,6 +953,7 @@
     <button id="menuAddon" aria-label="Add-ons"><svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true"><rect x="5" y="7" width="13" height="12" rx="2.5"/><circle cx="11.5" cy="7" r="3"/><circle cx="18" cy="13" r="3"/></svg><span class="tip">Add-ons</span></button>
     <button id="menuNotes" aria-label="Notepad"><svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true"><path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h10V5H7z"/><rect x="8.5" y="1.5" width="1.6" height="4" rx="0.8"/><rect x="11.2" y="1.5" width="1.6" height="4" rx="0.8"/><rect x="13.9" y="1.5" width="1.6" height="4" rx="0.8"/><rect x="8" y="9" width="8" height="1.4" rx="0.7"/><rect x="8" y="12" width="8" height="1.4" rx="0.7"/><rect x="8" y="15" width="5" height="1.4" rx="0.7"/></svg><span class="tip">Notepad</span></button>
     <button id="menuCal" aria-label="Calendar"><svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true"><path d="M7 2v2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7zm12 8v8H5v-8h14z"/></svg><span class="tip">Calendar</span></button>
+    <button id="menuEmail" aria-label="Email"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></svg><span class="tip">Email</span></button>
     <button id="menuCustom" aria-label="Customization"><svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.65-.75 1.65-1.69 0-.44-.18-.84-.44-1.13-.26-.29-.43-.68-.43-1.12 0-.94.76-1.7 1.7-1.7h2.34c2.86 0 5.18-2.32 5.18-5.18C22 6.5 17.5 2 12 2zm-6.5 9a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4-3.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4.5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3.5 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg><span class="tip">Customization</span></button>
     <button id="menuLinks" aria-label="Linked Accounts"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span class="tip">Linked Accounts</span></button>
     <button id="menuSettings" aria-label="Settings" style="margin-top:auto"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="tip">Settings</span></button>
@@ -1880,7 +1881,10 @@ function voiceAction(fin, name, followUp, isSpeaking){
   }
   if(w.hit && w.rest) return {type:"send", query:w.rest};
   if(w.hit) return {type:"ack"}; // bare name: "Yes?" + follow-up window
-  if(followUp && fin.trim()) return {type:"send", query:fin.trim()};
+  // email composer open: sticky voice session (like LUNA) — while the composer
+  // is open, everything said is about the email, no wake word needed
+  var emailHot=(typeof emailOpen==="function")&&emailOpen();
+  if((followUp||emailHot) && fin.trim()) return {type:"send", query:fin.trim()};
   return {type:"ignore"}; // no wake word: not for us
 }
 /* Mic state is event-driven and honest: micWanted = the user wants the mic on
@@ -2225,6 +2229,20 @@ function startEmail(query){
     else say("Who should I email? Type the address above, or just say it.");
   }
 }
+/* who is the "about" note for? family words map to a greeting name;
+   nicknames and names are left for the brain to interpret from the note */
+function emailRecipient(about){
+  var m=String(about||"").toLowerCase().match(/\b(mom|mommy|mama|mum|mummy|dad|daddy|papa|pops|pop|bro|brother|sis|sister|sissy|grandma|granny|nana|grandpa|bop|aunt|uncle|cousin)\b/);
+  if(!m) return "";
+  var w=m[1];
+  if(/^(mom|mommy|mama|mum|mummy)$/.test(w)) return "Mom";
+  if(/^(dad|daddy|papa|pops|pop)$/.test(w)) return "Dad";
+  if(/^(bro|brother)$/.test(w)) return "Bro";
+  if(/^(sis|sister|sissy)$/.test(w)) return "Sis";
+  if(/^(grandma|granny|nana)$/.test(w)) return "Grandma";
+  if(/^grandpa$/.test(w)) return "Grandpa";
+  return w.charAt(0).toUpperCase()+w.slice(1);
+}
 function draftEmail(toneNote){
   var M=emailState; if(!M) return;
   thinking=true;
@@ -2232,12 +2250,18 @@ function draftEmail(toneNote){
   $("emailSubject").value=""; $("emailBody").value="Drafting\u2026";
   $("subtitle").textContent="Drafting your email\u2026";
   var about=M.about||"", to=M.to||"";
-  askBrain("Write an email"+(S.name?(" from "+S.name):"")+" to "+to+". What it's about: "+about+"."+
+  var recip=emailRecipient(about);
+  askBrain("Write an email"+(S.name?(" from "+S.name):"")+(to?(" to "+to):"")+". "+
+    "The user described what it's about in their own words: \""+about+"\". "+
+    "That description is just a rough note \u2014 never paste it into the email word-for-word. "+
+    (recip?("It is for the user's "+recip.toLowerCase()+", so greet them as \"Hi "+recip+",\" and refer to them naturally. ")
+          :("Figure out who it is for from the description (a nickname, a name, whoever is mentioned) and address them by that name, e.g. \"Hi Mom,\". "))+
+    "Turn the description into a real message in first person \u2014 natural, warm, human. "+
+    "Never stiff, corporate, or formal unless asked."+
     (toneNote?(" Tone: "+toneNote+"."):"")+
-    " Write it the way a real person would actually write it \u2014 natural, warm, human."+
-    " Never stiff, corporate, or formal unless asked."+
     " Reply with exactly these two lines and nothing else \u2014 no extra text, no markdown:"+
-    "\nSUBJECT: <short subject line>\nBODY: <the email, 3-6 sentences, warm and natural>",
+    "\nSUBJECT: <short specific subject line, never the description copied>"+
+    "\nBODY: <the email, 3-6 sentences, warm and natural>",
     "You write short natural emails. Reply with ONLY a SUBJECT: line and a BODY: line, plain text, no markdown."
   ).then(function(r){
     thinking=false;
@@ -2704,6 +2728,7 @@ $("calPrev").onclick=function(){ calMonth--; if(calMonth<0){calMonth=11;calYear-
 $("calNext").onclick=function(){ calMonth++; if(calMonth>11){calMonth=0;calYear++;} loadCalMonth(); };
 $("calClose").onclick=function(){ hide("calWin"); };
 $("menuCal").onclick=function(){ closeMenu(); openYearCal(); };
+$("menuEmail").onclick=function(){ closeMenu(); startEmail(""); };
 
 // big year view (rail button): this year + next year, no past years
 function openYearCal(){
