@@ -3046,7 +3046,7 @@ function sysPrompt(){
 function lockedReply(q){
   var t=q.toLowerCase();
   if(/\b(image|picture|photo|drawing|draw|paint|generate|create)\b[\s\S]{0,20}\b(image|picture|photo|drawing|it)\b|\b(generate|create|make|draw)\b[\s\S]{0,12}\b(image|picture|photo|logo)\b/.test(t))
-    return "I can't generate images yet — that's coming soon.";
+    return "I can't generate images.";
   if(/\b(note|notes|notepad)\b/.test(t) || /remember this|take a note|save (this|that|it)/.test(t))
     return "I can't keep notes yet — that's coming soon.";
   /* Full-version features: the demo is chat-only. Anything the real Ondra
