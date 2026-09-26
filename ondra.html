@@ -1209,6 +1209,8 @@ var RB_STOPS=[["0","#ff3b30"],["0.17","#ff9500"],["0.33","#ffcc00"],["0.5","#34c
 var RB_CSS="linear-gradient(135deg,#ff3b30,#ff9500,#ffcc00,#34c759,#0a84ff,#bf5af2,#ff375f)";
 /* conic version for circular elements (swatches, orb) — no banding */
 var RB_CONIC="conic-gradient(from 210deg,#ff3b30,#ff9500,#ffcc00,#34c759,#0a84ff,#bf5af2,#ff375f,#ff3b30)";
+function rainbowWheelSVG(){var C=["#ff3b30","#ff9500","#ffcc00","#34c759","#0a84ff","#bf5af2","#ff375f","#ff3b30"];var s='<svg viewBox="0 0 100 100" style="display:block;width:100%;height:100%">';for(var i=0;i<8;i++){var a0=(210+i*45)*Math.PI/180,a1=(210+(i+1)*45)*Math.PI/180;var x0=(50+50*Math.cos(a0)).toFixed(1),y0=(50+50*Math.sin(a0)).toFixed(1),x1=(50+50*Math.cos(a1)).toFixed(1),y1=(50+50*Math.sin(a1)).toFixed(1);s+='<path d="M50,50L'+x0+','+y0+'A50,50 0 0 1 '+x1+','+y1+'Z" fill="'+C[i]+'"/>';}return s+'</svg>';}
+function rainbowBG(el,isR,fallback){if(!el)return;if(isR){el.style.background="none";el.innerHTML=rainbowWheelSVG();}else{el.innerHTML="";el.style.background=fallback;}}
 function isRainbow(n){ return n==="rainbow"; }
 function swatchBg(r){
   // what a color swatch shows: rainbow gets the gradient
@@ -1217,7 +1219,7 @@ function swatchBg(r){
 function appendRainbowSwatch(box, isSel, onPick){
   var d=document.createElement("div");
   d.className="sw"+(isSel?" sel":"");
-  d.title="rainbow"; d.style.background=RB_CONIC;
+  d.title="rainbow"; rainbowBG(d,true);
   d.onclick=function(){
     var kids=box.children;
     for(var k=0;k<kids.length;k++) kids[k].classList.remove("sel");
@@ -1403,7 +1405,7 @@ function startWizard(){
   }
   buildSwatches("wallSwatches","wallpaper");
   buildSwatches("orbSwatches","orb",function(n){
-    $("orbPreview").style.background=isRainbow(n)?RB_CONIC:orbBg(rainColor(n,RAINBOW[6]).c);
+    rainbowBG($("orbPreview"),isRainbow(n),orbBg(rainColor(n,RAINBOW[6]).c));
   });
   buildSwatches("auraSwatches","aura",function(n){
     var apw=$("auraPreview"), rb=isRainbow(n);
@@ -1472,7 +1474,7 @@ function goStep(n){
     // aura step preview: current orb body + current aura glow
     var oc=rainColor(wiz.orb,RAINBOW[6]), ac=rainColor(wiz.aura,RAINBOW[4]);
     var ap=$("auraPreview");
-    ap.style.background=isRainbow(wiz.orb)?RB_CONIC:orbBg(oc.c);
+    rainbowBG(ap,isRainbow(wiz.orb),orbBg(oc.c));
     ap.classList.toggle("rainbow-aura", isRainbow(wiz.aura));
     ap.style.boxShadow=isRainbow(wiz.aura)?"":"0 0 46px 14px "+rgba(ac.c,0.55);
   }
@@ -3411,8 +3413,7 @@ function applyTheme(st){
   // light wallpapers get dark HUD text so everything stays readable
   document.body.classList.toggle("light-wall", wLum>0.6);
   var orb=$("orb");
-  orb.style.background = oRain ? RB_CONIC :
-    "radial-gradient(circle at 35% 30%, "+rgba(o.c,0.95)+", "+o.c+" 55%, "+rgba(o.c,0.5)+")";
+  rainbowBG(orb,oRain,"radial-gradient(circle at 35% 30%, "+rgba(o.c,0.95)+", "+o.c+" 55%, "+rgba(o.c,0.5)+")");
   // thin outline so the orb stays visible when wallpaper/orb are the same color:
   // white on black wallpaper, black on everything else
   var outlineC=(st.wallpaper==="black")?"rgba(255,255,255,0.55)":"rgba(0,0,0,0.45)";
@@ -3427,7 +3428,7 @@ function applyTheme(st){
     "0 0 40px 12px rgba(255,59,48,.8), 0 0 80px 24px rgba(255,204,0,.6), 0 0 120px 36px rgba(10,132,255,.6)" :
     "0 0 100px 30px "+rgba(a.c,0.8))+" !important;}";
   var op=$("orbPreview");
-  if(op) op.style.background=oRain?RB_CONIC:orbBg(o.c);
+  if(op) rainbowBG(op,oRain,orbBg(o.c));
 }
 function startHud(st, sayHi){
   S.name=st.name; S.wake=st.wake||"hey"; S.voice=st.voice; S.pers=st.pers;
