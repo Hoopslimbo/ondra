@@ -2108,8 +2108,12 @@ function isLongFormRequest(q){
 }
 /* ================= EMAIL ================= */
 function isEmailQ(q){
-  return /\b(write|draft|compose|send|create|make)\b[\s\S]{0,30}?\bemail\b/i.test(q) ||
-         /\bemail\b[\s\S]{0,30}?\b(to|for)\b/i.test(q);
+  var t=String(q||"");
+  if(/\b(write|draft|compose|send|create|make)\b[\s\S]{0,30}?\bemail\b/i.test(t)) return true;
+  if(/\bemail\b[\s\S]{0,30}?\b(to|for)\b/i.test(t)) return true;
+  if(/\bemail\s+(my|mom|dad|him|her|them|us|the)\b/i.test(t)) return true; /* "email my mom ..." */
+  if(/\b(can|could|please)\b[\s\S]{0,20}?\bemail\b/i.test(t)) return true; /* "can you email ..." */
+  return false;
 }
 function doEmail(query){
   thinking=true;
@@ -2120,10 +2124,13 @@ function doEmail(query){
   if(tm) to=tm[1];
   var em=query.match(/[\w.+-]+@[\w-]+\.[\w.]+/);
   if(em) to=em[0];
-  askBrain("Write a professional email based on this request: \""+query+"\". "+
+  askBrain("Write an email based on this request: \""+query+"\". "+
+    "Write it the way a real person would actually write it — natural, warm, human. "+
+    "Never stiff, corporate, or formal unless the request asks for formal. "+
+    "Keep the subject line short and specific. "+
     "Return ONLY the email in this exact format:\nSubject: <subject line>\n\n<body text>\n"+
     "No greeting like 'Here is your email', just the subject line and body.",
-    "You write concise professional emails. No meta-commentary."
+    "You write natural, human emails. No meta-commentary."
   ).then(function(r){
     thinking=false;
     var text=r.text||"";
@@ -2852,8 +2859,6 @@ function lockedReply(q){
     return "I don't have live weather yet — that's coming soon.";
   if(/\b(give|make|show|send) me\b[\s\S]{0,15}\ba list\b|\blist of\b|\blist\b[\s\S]{0,10}\b(for|things|items)\b/.test(t))
     return "I can't build lists yet — that's coming soon.";
-  if(/\b(write|draft|compose)\b[\s\S]{0,15}\b(email|letter)\b|\bsend\b[\s\S]{0,15}\b(an? )?(email|text message)\b/.test(t))
-    return "I can't write emails yet — that's coming soon.";
   if(/\bnews\b|\bheadlines\b|\bbriefing\b/.test(t))
     return "I don't have news briefings yet — that's coming soon.";
   if(/^\s*(open|launch)\b|\bplay\b[\s\S]{0,20}\b(spotify|youtube|music|song)\b/.test(t))
