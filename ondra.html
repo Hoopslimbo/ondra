@@ -4,7 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ondra</title>
-<!-- ONDRA v35.3 — 2026-09-26: voice self-refresh — every 2 min while idle, the app
+<!-- ONDRA v35.4 — 2026-09-26: open tabs on command — "open <site>" uses Luna's
+     official-site resolver (shortcuts -> typed domain -> brain -> Wikipedia
+     external links -> DuckDuckGo -> Google search fallback) and opens the real
+     homepage in a new tab. In-app targets (calendar, email, settings, notes,
+     memory, customization) keep their existing handlers.
+     ONDRA v35.3 — 2026-09-26: voice self-refresh — every 2 min while idle, the app
      gently revives the speech stack (unwedge speechSynthesis, resume AudioContext,
      auto-restart a mic that died on its own) so long sessions stop glitching
      without the user reloading or tapping the mic button. Never interrupts live use.
@@ -3576,6 +3581,92 @@ function doLookup(lq){
          }).catch(function(){ noGood("I couldn't find anything on \""+query+"\". Try asking me another way."); });
        });
 }
+/* ============ OPEN TABS ON COMMAND (Luna-style official-site resolver) ============ */
+var SITE_SHORTCUTS={
+  "youtube":"https://www.youtube.com",
+  "gmail":"https://mail.google.com",
+  "google drive":"https://drive.google.com","drive":"https://drive.google.com",
+  "google docs":"https://docs.google.com","docs":"https://docs.google.com",
+  "google sheets":"https://docs.google.com/spreadsheets","sheets":"https://docs.google.com/spreadsheets",
+  "google slides":"https://docs.google.com/presentation","slides":"https://docs.google.com/presentation",
+  "google classroom":"https://classroom.google.com","classroom":"https://classroom.google.com",
+  "google":"https://www.google.com",
+  "chess.com":"https://www.chess.com","chess":"https://www.chess.com",
+  "duolingo":"https://www.duolingo.com"
+};
+function openTarget(text){
+  var m=/^(?:open(?: up)?|go to|launch|visit|pull up)\s+(.+)/i.exec(String(text||"").trim());
+  if(!m) return null;
+  var t=m[1].trim().replace(/[?.!]+$/,"");
+  if(!t) return null;
+  if(/\b(calendar|e-?mail|settings?|notepad|notes?|memor|customiz)/i.test(t)) return null; // in-app: keep existing handlers
+  return t;
+}
+function officialSiteUrl(name){
+  // tier 1: the brain knows the famous homepages
+  return askBrain("What is the official homepage URL for "+name+"? Reply with ONLY the full URL starting with https:// and nothing else. If you are not sure, reply with exactly: UNKNOWN",
+    "You answer with only a URL or the word UNKNOWN. No other text.").then(function(r){
+    var u=String(r.text||"").trim().split(/\s+/)[0].replace(/^["'“”]+|["'“”.,;!?]+$/g,"");
+    if(/^https?:\/\/[a-z0-9-]+(\.[a-z0-9-]+)+/i.test(u) && !/unknown/i.test(u)) return u;
+    return wikiSiteUrl(name);
+  }).catch(function(){ return wikiSiteUrl(name); });
+}
+function wikiSiteUrl(name){
+  // tier 2: Wikipedia's external links, best-match scoring (from Luna)
+  var token=name.toLowerCase().replace(/\.(com|org|net|gov|io|ai|co|edu)$/,"").replace(/[^a-z0-9]/g,"");
+  if(!token) return ddgSiteUrl(name);
+  return withTimeout(fetch("https://en.wikipedia.org/w/api.php?action=query&prop=extlinks&titles="+
+    encodeURIComponent(name)+"&format=json&origin=*&redirects=1&ellimit=120"),8000).then(function(r){ return r.json(); }).then(function(j){
+    var pages=(j.query&&j.query.pages)||{};
+    var badSub=/^(blog|support|help|community|developer|forum|status|careers|making)$/;
+    var best=null, bestScore=-1;
+    for(var pid in pages){
+      var links=(pages[pid]&&pages[pid].extlinks)||[];
+      for(var i=0;i<links.length;i++){
+        var u=links[i]["*"]||"";
+        var m=u.match(/^https?:\/\/([^\/]+)(\/[^?#]*)?/i);
+        if(!m) continue;
+        var labels=m[1].toLowerCase().split(".");
+        if(labels.indexOf(token)<0) continue;
+        if(badSub.test(labels[0])) continue;
+        var exact=(labels[0]===token)||(labels[0]==="www"&&labels[1]===token);
+        var depth=(m[2]||"/").split("/").filter(Boolean).length;
+        var score=(exact?10:0)+(depth===0?5:0)-depth;
+        if(score>bestScore){ bestScore=score; best=u; }
+      }
+    }
+    if(best) return best;
+    return ddgSiteUrl(name);
+  }).catch(function(){ return ddgSiteUrl(name); });
+}
+function ddgSiteUrl(name){
+  // tier 3: DuckDuckGo instant answers
+  return withTimeout(fetch("https://api.duckduckgo.com/?q="+encodeURIComponent(name+" official site")+"&format=json&no_html=1&skip_disambig=1"),7000).then(function(r){ return r.json(); }).then(function(j){
+    var u=String((j&&j.AbstractURL)||"").trim();
+    if(/^https?:\/\/[a-z0-9-]+(\.[a-z0-9-]+)+/i.test(u)) return u;
+    return null;
+  }).catch(function(){ return null; });
+}
+function openSiteTab(url, spoken){
+  var w=null;
+  try{ w=window.open(url,"_blank"); }catch(e){ w=null; }
+  thinking=false;
+  if(w) say(spoken);
+  else say("Your browser blocked the new tab — allow popups for this site and try again.");
+}
+function doOpenSite(target){
+  var key=target.toLowerCase().replace(/^(?:the|a|my)\s+/,"").replace(/\s+(?:website|web ?site|site|page|app)$/,"");
+  if(SITE_SHORTCUTS[key]){ openSiteTab(SITE_SHORTCUTS[key],"Opening "+target+"."); return; }
+  var nospace=target.replace(/\s+/g,"");
+  if(/^[a-z0-9-]+(\.[a-z0-9-]+)+(\/\S*)?$/i.test(nospace)){ openSiteTab("https://"+nospace,"Opening "+nospace+"."); return; }
+  $("subtitle").textContent="Finding the official site…";
+  officialSiteUrl(key).then(function(found){
+    if(found) openSiteTab(found,"Opening "+target+".");
+    else openSiteTab("https://www.google.com/search?q="+encodeURIComponent(target),"I couldn't find the official page, so here's a Google search for "+target+".");
+  }).catch(function(){
+    openSiteTab("https://www.google.com/search?q="+encodeURIComponent(target),"I couldn't find the official page, so here's a Google search for "+target+".");
+  });
+}
 function sendMessage(text){
   if(!$("welcomeModal").classList.contains("hidden")) return; // welcome must be dismissed first
   text=String(text||"").trim();
@@ -3618,6 +3709,8 @@ function sendMessage(text){
   if(isCalOpenQ(text)){ openCalendar(); return; } // calendar: month window on the right
   if(isCalAddQ(text)){ doCalAdd(text); return; } // calendar: add event
   if(isTimeQ(text)){ doClock(); return; } // mini clock popup, free
+  var ot=openTarget(text);
+  if(ot){ doOpenSite(ot); return; } // "open <site>": Luna-style official-site tab
   var local=localAnswer(text);
   if(local){ thinking=false; say(local,"");  return; }
   var lq=lookupQuery(text);
