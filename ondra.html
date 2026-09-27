@@ -4,7 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ondra</title>
-<!-- ONDRA v35.5 — 2026-09-26: add-ons deleted everywhere (rail button, modal, CSS, JS)
+<!-- ONDRA v35.6 — 2026-09-26: email drafts are written in the user's voice —
+     the sender is the user, never Ondra (fixes "it's me, Ondra, from the future").
+     ONDRA v35.5 — 2026-09-26: add-ons deleted everywhere (rail button, modal, CSS, JS)
      at the user's order — no more boosts, full or demo.
      ONDRA v35.4 — 2026-09-26: open tabs on command — "open <site>" uses Luna's
      official-site resolver (shortcuts -> typed domain -> brain -> Wikipedia
@@ -2300,7 +2302,8 @@ function draftEmail(toneNote){
   $("subtitle").textContent="Drafting your email\u2026";
   var about=M.about||"", to=M.to||"";
   var recip=emailRecipient(about);
-  askBrain("Write an email"+(S.name?(" from "+S.name):"")+(to?(" to "+to):"")+". "+
+  askBrain("Write an email from the user"+(to?(" to "+to):"")+". "+
+    "The sender is the user — write in first person AS THE USER. Never write as Ondra, never say \"it's me, Ondra\", never sign the email as Ondra. If the user asked for the email to be from their future self or anyone else, stay in that role as the user. "+
     "The user described what it's about in their own words: \""+about+"\". "+
     "That description is just a rough note \u2014 never paste it into the email word-for-word. "+
     (recip?("It is for the user's "+recip.toLowerCase()+", so greet them as \"Hi "+recip+",\" and refer to them naturally. ")
@@ -2316,7 +2319,7 @@ function draftEmail(toneNote){
     thinking=false;
     var p=parseEmailDraft(r.text||""), subj=p.subject, body=p.body;
     if(!subj) subj=about.length>60?about.slice(0,57)+"\u2026":about;
-    if(!body) body="Hi,\n\n"+about.charAt(0).toUpperCase()+about.slice(1)+".\n\n\u2014 "+(S.name||"");
+    if(!body) body="Hi,\n\n"+about.charAt(0).toUpperCase()+about.slice(1)+".";
     $("emailSubject").value=subj; $("emailBody").value=body;
     say("Done \u2014 the email's in the window. Tell me any edits, say \"send it\" when it's ready, or \"scrap it\".");
   }).catch(function(){
