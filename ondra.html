@@ -4,7 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ondra</title>
-<!-- ONDRA v35.2 — 2026-09-26: retro memory-wipe animation — "Forget everything"
+<!-- ONDRA v35.3 — 2026-09-26: voice self-refresh — every 2 min while idle, the app
+     gently revives the speech stack (unwedge speechSynthesis, resume AudioContext,
+     auto-restart a mic that died on its own) so long sessions stop glitching
+     without the user reloading or tapping the mic button. Never interrupts live use.
+     ONDRA v35.2 — 2026-09-26: retro memory-wipe animation — "Forget everything"
      plays a backwards retro loading bar draining 100% -> 0%, flashes "MEMORY WIPED!",
      then closes. The wipe itself lands exactly at 0%.
      ONDRA v35.1 — 2026-09-26: Memory — rail brain button replaces Linked Accounts;
@@ -1896,7 +1900,7 @@ function pulseOrb(){
   setTimeout(function(){ orb.classList.remove("pulseOnce"); },600);
 }
 var SR = window.SpeechRecognition || window.webkitSpeechRecognition || null;
-var recog=null, micWanted=false, micLive=false, micRestarts=0, speaking=false, followUpUntil=0;
+var recog=null, micWanted=false, micLive=false, micRestarts=0, micDied=false, speaking=false, followUpUntil=0;
 function editDist(a,b){
   // tiny Levenshtein for the wake-word smear fallback below
   a=String(a); b=String(b);
@@ -1971,7 +1975,7 @@ function scheduleMicRestart(){
   micRestarts++;
   if(micRestarts>5 || !micWanted){
     micWanted=false; setMicLive(false);
-    if(micRestarts>5) flashHint("The mic stopped responding — tap the mic button to restart it.");
+    if(micRestarts>5){ micDied=true; flashHint("The mic stopped responding — I'll try to bring it back on its own; tap the mic button if it doesn't come back."); }
     return;
   }
   var r=recog;
@@ -1989,7 +1993,7 @@ function startListening(quiet){
   try{
     recog=new SR();
     recog.continuous=true; recog.interimResults=true; recog.lang="en-US";
-    micWanted=true; micRestarts=0;
+    micWanted=true; micRestarts=0; micDied=false;
     recog.onresult=function(ev){
       var fin="", heard=false;
       for(var i=ev.resultIndex;i<ev.results.length;i++){
@@ -2031,7 +2035,22 @@ function startListening(quiet){
   }catch(e){ micWanted=false; flashHint("Couldn't start the mic — type instead."); }
 }
 function toggleMic(){ if(micWanted) stopMic(); else startListening(false); }
-function stopMic(){ micWanted=false; setMicLive(false); try{ if(recog) recog.stop(); }catch(e){} }
+function stopMic(){ micWanted=false; micDied=false; setMicLive(false); try{ if(recog) recog.stop(); }catch(e){} }
+/* Voice self-refresh: after the page sits open a long time, the browser's
+   speech stack wedges — recognition gives up after 5 failed restarts,
+   speechSynthesis stalls, the AudioContext suspends. Every 2 minutes, while
+   the app is fully idle, this gently revives the stack so long sessions stop
+   glitching without the user reloading the page or tapping the mic button.
+   Never interrupts live use. */
+function voiceRefresh(){
+  try{
+    if(speaking || thinking || Date.now()<followUpUntil) return; // busy: hands off
+    if(window.speechSynthesis){ try{ speechSynthesis.cancel(); }catch(e){} } // unwedge a stuck TTS queue
+    try{ ensureCtx(); }catch(e){} // wake a suspended AudioContext
+    if(micDied && SR && !micWanted) startListening(true); // revive a mic that died on its own (never one the user turned off)
+  }catch(e){}
+}
+setInterval(voiceRefresh, 120000);
 var lastAckWake=0;
 function ackWake(){
   // debounce: Chrome sometimes fires duplicate final transcripts for one
